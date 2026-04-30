@@ -16,9 +16,9 @@ function preprocessMarkdown(text){
   const lines=t.split('\n');
   const out=[]; let inComment=false;
   for(const line of lines){
-    if(/^<[^<].*/.test(line.trim())){
+    if(/^>[^>].*/.test(line.trim())){
       if(!inComment){out.push(':::comment'); inComment=true;}
-      out.push(line.replace(/^\s*</,'').trim());
+      out.push(line.replace(/^\s*>/,'').trim());
     }else{
       if(inComment){out.push(':::'); inComment=false;}
       out.push(line);
