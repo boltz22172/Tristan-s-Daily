@@ -1,9 +1,12 @@
+
 const REPO_CONFIG = { owner: 'YOUR_GITHUB_OWNER', repo: 'Tristan-s-Daily', branch: 'work' };
 const state = { lang: 'zh', entries: [], activeEntryId: null };
+
 const i18n = {
   zh: { compose: '撰写', categories: '分类', featured: '精选', title: '标题', typeFilter: '类型筛选', all: '全部', thought: '随想', work: '工作日志' },
   en: { compose: 'Compose', categories: 'Categories', featured: 'Featured', title: 'Title', typeFilter: 'Type', all: 'All', thought: 'Thought', work: 'Work Log' }
 };
+
 const el = (id) => document.getElementById(id);
 const b64 = (s) => btoa(unescape(encodeURIComponent(s)));
 
@@ -15,10 +18,12 @@ function applyLang() {
   const t = i18n[state.lang], nav = document.querySelectorAll('.nav-btn');
   nav[0].textContent = t.compose; nav[1].textContent = t.categories; nav[2].textContent = t.featured;
   el('entryTitle').placeholder = t.title; el('filterLabel').textContent = t.typeFilter;
+
   document.querySelector('#filterType option[value="all"]').textContent = t.all;
   document.querySelector('#filterType option[value="thought"]').textContent = t.thought;
   document.querySelector('#filterType option[value="work"]').textContent = t.work;
 }
+
 
 function buildEntryFromEditor() {
   const date = el('entryDate').value;
@@ -48,6 +53,7 @@ function renderCategories() {
       const item = document.createElement('button'); item.className = 'entry-item';
       item.innerHTML = `<strong>${e.date}</strong> · ${e.title} <small>(${e.type})</small>`;
       item.addEventListener('click', () => loadEntryToComposer(e.id));
+
       block.appendChild(item);
     });
     timeline.appendChild(block);
@@ -55,14 +61,17 @@ function renderCategories() {
 }
 
 function renderFeatured() {
+
   const target = el('featuredList'); target.innerHTML = '';
   state.entries.filter(e => e.featured).forEach(e => {
     const card = document.createElement('article'); card.className = 'card';
     card.innerHTML = `<h3>${e.title}</h3><p>${e.date}</p><button class="entry-item">打开并编辑</button><div>${marked.parse(e.content || '')}</div>`;
     card.querySelector('button').addEventListener('click', () => loadEntryToComposer(e.id));
+
     target.appendChild(card);
   });
 }
+
 
 async function getContentSha(path, token) {
   const url = `https://api.github.com/repos/${REPO_CONFIG.owner}/${REPO_CONFIG.repo}/contents/${path}?ref=${REPO_CONFIG.branch}`;
@@ -104,20 +113,24 @@ async function saveEntry() {
   } catch (err) {
     el('publishStatus').textContent = `保存失败：${err.message}`;
   }
+
 }
 
 async function init() {
   const res = await fetch('data/entries.json');
   state.entries = await res.json();
+
   applyLang(); renderCategories(); renderFeatured(); renderMarkdown();
   el('entryDate').valueAsDate = new Date();
 }
 
 document.querySelectorAll('.nav-btn').forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.view)));
+
 el('langToggle').addEventListener('click', () => { state.lang = state.lang === 'zh' ? 'en' : 'zh'; el('langToggle').textContent = state.lang === 'zh' ? 'EN' : '中'; applyLang(); });
 el('themeToggle').addEventListener('click', () => { document.body.dataset.theme = document.body.dataset.theme === 'dark' ? 'light' : 'dark'; });
 el('markdownInput').addEventListener('input', renderMarkdown);
 el('filterType').addEventListener('change', renderCategories);
+
 el('saveBtn').addEventListener('click', saveEntry);
 
 init();
