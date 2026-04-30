@@ -1,11 +1,21 @@
 const state = { lang: 'zh', entries: [], uploads: [], activeId: null, dirty: false, settings: { theme:'desert', fontZh:'kaiti', fontEn:'times', bgImage:'', previewOpacity:0.75 } };
 const STORE='tristan_entries_v6', USTORE='tristan_uploads_v6', SSTORE='tristan_settings_v1';
-const md=window.markdownit({html:true,linkify:true,breaks:true,typographer:true})
+const md = window.markdownit({ html:true, linkify:true, breaks:true, typographer:true })
   .use(window.markdownitMark)
-  .use(window.markdownitIns)
-  .use(window.markdownitDollarmath,{allow_space:true,allow_digits:true,double_inline:true,renderer:(content,displayMode)=>window.katex.renderToString(content,{throwOnError:false,displayMode})})
-  .use(window.texmath,{engine:window.katex,delimiters:'brackets',katexOptions:{throwOnError:false}})
-  .use(window.markdownitContainer,'comment',{render:(tokens,idx)=>tokens[idx].nesting===1?'<div class="md-comment">':'</div>'});
+  .use(window.markdownitIns);
+
+if (window.markdownitDollarmath) {
+  md.use(window.markdownitDollarmath, {
+    allow_space:true,
+    allow_digits:true,
+    double_inline:true,
+    renderer:(content,displayMode)=>window.katex.renderToString(content,{throwOnError:false,displayMode})
+  });
+}
+if (window.texmath) {
+  md.use(window.texmath,{engine:window.katex,delimiters:'brackets',katexOptions:{throwOnError:false}});
+}
+md.use(window.markdownitContainer,'comment',{render:(tokens,idx)=>tokens[idx].nesting===1?'<div class="md-comment">':'</div>'});
 
 // Treat markdown blockquotes as comment blocks (only at markdown token level, no raw text preprocessing)
 const _bqOpen = md.renderer.rules.blockquote_open || (() => '<blockquote>');
