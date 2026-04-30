@@ -13,12 +13,14 @@ function t(k){return dict[state.lang][k]||k;}
 function persist(){localStorage.setItem(STORE,JSON.stringify(state.entries));localStorage.setItem(USTORE,JSON.stringify(state.uploads));localStorage.setItem(SSTORE,JSON.stringify(state.settings));}
 function preprocessMarkdown(text){
   let t=(text||'').replace(/\{\{u:([\s\S]*?)\}\}/g,'<u>$1</u>');
+  t=t.replace(/\s*\$\$\s*\n?/g,'\n$$\n');
+  t=t.replace(/\n{3,}/g,'\n\n');
   const lines=t.split('\n');
   const out=[]; let inComment=false;
   for(const line of lines){
-    if(/^>[^>].*/.test(line.trim())){
+    if(/^>.*/.test(line)){
       if(!inComment){out.push(':::comment'); inComment=true;}
-      out.push(line.replace(/^\s*>/,'').trim());
+      out.push(line.replace(/^\s*> ?/,'').replace(/ /g,' '));
     }else{
       if(inComment){out.push(':::'); inComment=false;}
       out.push(line);
