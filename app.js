@@ -8,8 +8,18 @@ const STORE = 'tristan_entries_v4';
 const UPLOAD_STORE = 'tristan_uploads_v4';
 const EDIT_VIEWS = new Set(['docs', 'featured', 'uploads', 'reader']);
 
+
+marked.setOptions({ gfm: true, breaks: true });
+
+function preprocessMarkdown(md) {
+  return (md || '')
+    .replace(/==([^=]+)==/g, '<mark>$1</mark>')
+    .replace(/\+\+([^+]+)\+\+/g, '<u>$1</u>');
+}
 function renderMdInto(el, md) {
-  el.innerHTML = marked.parse(md || '');
+  const pre = preprocessMarkdown(md);
+  el.innerHTML = marked.parse(pre);
+  el.querySelectorAll('pre code').forEach((block) => { if (window.hljs) window.hljs.highlightElement(block); });
   if (window.renderMathInElement) {
     window.renderMathInElement(el, {
       delimiters: [
