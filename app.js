@@ -102,11 +102,13 @@ function renderUploads() {
   const list = $('uploadList'); list.innerHTML = '';
   state.uploads.forEach((f, idx) => {
     const row = document.createElement('div'); row.className = 'form-row card';
-    row.innerHTML = `<span>${f.name} (${f.kind})</span><button class="open-u">浏览</button><button class="save-u">保存到文档</button><button class="del-u">删除</button>`;
+    row.innerHTML = f.kind === 'md'
+      ? `<span>${f.name} (md)</span><button class="open-u">浏览</button><button class="save-u">保存到文档</button><button class="del-u">删除</button>`
+      : `<span>${f.name} (pdf)</span><button class="open-u">浏览</button><button class="del-u">删除</button>`;
     row.querySelector('.open-u').onclick = () => openUpload(idx);
-    row.querySelector('.save-u').onclick = () => { saveUploadAsEntry(f); $('status').textContent = `已保存上传文件：${f.name}`; };
+    const saveBtn = row.querySelector('.save-u');
+    if (saveBtn) saveBtn.onclick = () => { saveUploadAsEntry(f); $('status').textContent = `已保存上传文件：${f.name}`; };
     row.querySelector('.del-u').onclick = () => { if(window.confirm('是否删除该上传文件？')){ state.uploads.splice(idx,1); persist(); renderUploads(); $('filePreview').innerHTML=''; } };
-    if (f.kind !== 'md') row.querySelector('.save-u').disabled = true;
     list.appendChild(row);
   });
 }

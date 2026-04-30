@@ -1,8 +1,51 @@
-:root { --bg:#f3edd8; --panel:#fffaf0; --text:#2a2419; --line:#00000022; --accent:#4e5b3b; --soft:#efe6cc; }
-body[data-theme="dark"] { --bg:#1f1e1a; --panel:#2b2923; --text:#f1e9d6; --line:#ffffff22; --accent:#bfa774; --soft:#343028; }
-*{box-sizing:border-box} body{margin:0;min-height:100vh;display:grid;grid-template-columns:240px 1fr;background:radial-gradient(circle at top right,var(--soft),var(--bg));color:var(--text);font-family:"Noto Serif SC",serif}
-.sidebar{border-right:1px solid var(--line);padding:18px;backdrop-filter: blur(1px)}.logo{margin:6px 0 14px}.nav-btn{display:block;width:100%;margin:8px 0;padding:10px;border-radius:10px}.nav-btn.active{background:var(--accent);color:#fff}.tool-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.main{padding:18px}.view{display:none}.view.active{display:block}.form-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
-input,select,textarea,button,iframe{border:1px solid var(--line);background:var(--panel);color:var(--text);padding:8px;border-radius:8px}button{cursor:pointer}button:hover{filter:brightness(0.97)}#titleInput{flex:1}
-.editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}#mdInput,.preview{min-height:52vh}.preview{padding:14px;overflow:auto;line-height:1.65}.card{border:1px solid var(--line);background:var(--panel);padding:12px;margin:10px 0;border-radius:12px;box-shadow:0 2px 8px #0000000d}.entry-link{display:block;width:100%;text-align:left;margin:6px 0}.muted{opacity:.82}.pdf-frame{width:100%;height:60vh}
+:root {
+  --bg: #e9dcc0;
+  --panel: rgba(255, 247, 231, 0.92);
+  --text: #2f2419;
+  --line: #6f553422;
+  --accent: #8c5b2f;
+  --accent-2: #4d3824;
+  --shadow: 0 8px 24px #0000001a;
+}
+body[data-theme="dark"] {
+  --bg: #1e1a16;
+  --panel: rgba(43, 36, 29, 0.92);
+  --text: #efe4cd;
+  --line: #ffffff26;
+  --accent: #b27c43;
+  --accent-2: #d5b07e;
+  --shadow: 0 8px 30px #00000055;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;min-height:100vh;display:grid;grid-template-columns:260px 1fr;
+  background:
+    linear-gradient(140deg, #00000010 0%, #00000000 30%),
+    url('https://images.unsplash.com/photo-1615212049275-26d0e3fd6b63?auto=format&fit=crop&w=1600&q=80') center/cover fixed;
+  color:var(--text);
+  font-family:"STKaiti","KaiTi","Kaiti SC","Georgia",serif;
+}
+.sidebar{border-right:1px solid var(--line);padding:18px;background:linear-gradient(180deg,#00000022,#00000008);backdrop-filter:blur(3px)}
+.logo{margin:6px 0 14px;font-size:1.3rem;letter-spacing:1px;color:#fff7e7;text-shadow:0 1px 2px #0008}
+.nav-btn{display:block;width:100%;margin:8px 0;padding:10px;border-radius:12px;border:1px solid #ffffff33;background:#ffffff1a;color:#fff7e7}
+.nav-btn.active{background:linear-gradient(120deg,var(--accent),var(--accent-2));color:#fff;border-color:#ffffff44}
+.tool-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.main{padding:20px}
+.view{display:none}.view.active{display:block}
+.form-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+input,select,textarea,button,iframe{border:1px solid var(--line);background:var(--panel);color:var(--text);padding:9px;border-radius:10px}
+button{cursor:pointer}button:hover{filter:brightness(0.98)}#titleInput{flex:1}
+.editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+#mdInput,.preview{min-height:54vh}
+.preview{padding:16px;overflow:auto;line-height:1.8;box-shadow:var(--shadow)}
+#mdInput{box-shadow:var(--shadow)}
+.card{border:1px solid var(--line);background:var(--panel);padding:14px;margin:12px 0;border-radius:14px;box-shadow:var(--shadow)}
+.entry-link{display:block;width:100%;text-align:left;margin:6px 0}
+.muted{opacity:.9;color:#2f2419;background:var(--panel);padding:4px 8px;border-radius:8px}
+.pdf-frame{width:100%;height:65vh;background:white}
+h1,h2,h3{font-family:"STKaiti","KaiTi","Kaiti SC",serif}
+pre{background:#2b2119;color:#f7ebd8;padding:12px;border-radius:10px;overflow:auto}
+code{font-family:"Georgia",monospace}
+mark{background:#f4d67a88;padding:0 3px;border-radius:4px}
+u{text-decoration-color:var(--accent)}
 @media (max-width:900px){body{grid-template-columns:1fr}.editor-grid{grid-template-columns:1fr}}
