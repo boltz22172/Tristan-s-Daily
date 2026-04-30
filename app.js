@@ -1,4 +1,4 @@
-const state = { lang: 'zh', entries: [], uploads: [], activeId: null, dirty: false, settings: { theme:'light', fontZh:'kaiti', fontEn:'times', bgImage:'', previewOpacity:0.75 } };
+const state = { lang: 'zh', entries: [], uploads: [], activeId: null, dirty: false, settings: { theme:'desert', fontZh:'kaiti', fontEn:'times', bgImage:'', previewOpacity:0.75 } };
 const STORE='tristan_entries_v6', USTORE='tristan_uploads_v6', SSTORE='tristan_settings_v1';
 const md=window.markdownit({html:true,linkify:true,breaks:true,typographer:true})
   .use(window.markdownitMark)
@@ -50,10 +50,18 @@ const $=(id)=>document.getElementById(id);
 const dict={zh:{compose:'撰写',docs:'文档',featured:'精选',uploads:'上传文件',save:'保存',settings:'设置',language:'语言',theme:'主题',fontZh:'中文字体',fontEn:'英文字体',bgImage:'背景图片',resetBg:'重置背景',previewOpacity:'渲染区透明度',backDocs:'返回文档',setFeatured:'设为精选',thought:'随想',work:'工作日志',all:'全部',filter:'类型筛选',titlePH:'标题',mdPH:'开始写作（支持公式与代码）',unsaved:'检测到未保存内容，是否放弃并离开撰写页？',delDoc:'是否删除该文档？',delUpload:'是否删除该上传文件？',saved:'保存成功：',editing:'编辑中：',newStatus:'未保存',savedUpload:'已保存上传文件：',pdfSaved:'PDF 文档已保存'},en:{compose:'Compose',docs:'Documents',featured:'Featured',uploads:'Uploads',save:'Save',settings:'Settings',language:'Language',theme:'Theme',fontZh:'Chinese Font',fontEn:'English Font',bgImage:'Background Image',resetBg:'Reset Background',previewOpacity:'Preview Opacity',backDocs:'Back to Documents',setFeatured:'Set Featured',thought:'Thought',work:'Work Log',all:'All',filter:'Type Filter',titlePH:'Title',mdPH:'Start writing (math/code supported)',unsaved:'Unsaved changes detected. Discard and leave composer?',delDoc:'Delete this document?',delUpload:'Delete this upload?',saved:'Saved: ',editing:'Editing: ',newStatus:'Not saved',savedUpload:'Saved upload: ',pdfSaved:'PDF saved as document'}};
 
 function t(k){return dict[state.lang][k]||k;}
+
+function currentQuote(){
+  if(state.settings.theme==='snow') return '柴门闻犬吠，风雪夜归人';
+  if(state.settings.theme==='bamboo') return '苍苍竹林寺，杳杳钟声晚';
+  return '大漠孤烟直，长河落日圆';
+}
+
 function persist(){localStorage.setItem(STORE,JSON.stringify(state.entries));localStorage.setItem(USTORE,JSON.stringify(state.uploads));localStorage.setItem(SSTORE,JSON.stringify(state.settings));}
 function renderMdInto(el,text){el.innerHTML=md.render(text||'');el.querySelectorAll('pre code').forEach(b=>window.hljs&&window.hljs.highlightElement(b));}
 function applySettings(){document.body.dataset.theme=state.settings.theme;document.body.style.setProperty('--font-zh',state.settings.fontZh);document.body.style.setProperty('--font-en',state.settings.fontEn);document.body.style.backgroundImage=state.settings.bgImage?`linear-gradient(120deg,#f7ebd34d,#0000 45%),url('${state.settings.bgImage}')`:'none';document.body.style.backgroundColor='#efe2c8';
-  document.documentElement.style.setProperty('--preview-opacity', String(state.settings.previewOpacity||0.75));}
+  document.documentElement.style.setProperty('--preview-opacity', String(state.settings.previewOpacity||0.75));
+  const q=document.querySelector('.quote-svg text'); if(q) q.textContent=currentQuote();}
 function applyI18n(){document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));$('titleInput').placeholder=t('titlePH');$('mdInput').placeholder=t('mdPH');$('filterLabel').textContent=t('filter');$('status').textContent=t('newStatus');$('typeInput').options[0].text=t('thought');$('typeInput').options[1].text=t('work');$('filterType').options[0].text=t('all');$('filterType').options[1].text=t('thought');$('filterType').options[2].text=t('work');$('uploadType').options[0].text=t('thought');$('uploadType').options[1].text=t('work');}
 
 function setView(v){if($('compose').classList.contains('active')&&state.dirty&&!confirm(t('unsaved')))return;if(v!=='compose')resetCompose();document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id===v));document.querySelectorAll('.nav-btn').forEach(x=>x.classList.toggle('active',x.dataset.view===v));}
