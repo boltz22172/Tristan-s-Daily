@@ -1,8 +1,6 @@
 const REPO_CONFIG = { owner: 'boltz22172', repo: 'Tristan-s-Daily', branch: 'work' };
 const state = { lang: 'zh', entries: [], activeEntryId: null };
 
-const REPO_CONFIG = { owner: 'YOUR_GITHUB_OWNER', repo: 'Tristan-s-Daily', branch: 'work' };
-const state = { lang: 'zh', entries: [], activeEntryId: null };
 
 const i18n = {
   zh: { compose: '撰写', categories: '分类', featured: '精选', title: '标题', typeFilter: '类型筛选', all: '全部', thought: '随想', work: '工作日志' },
