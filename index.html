@@ -9,45 +9,42 @@
 </head>
 <body data-theme="light">
   <aside class="sidebar">
-    <h1>Tristan's Daily</h1>
-    <nav>
+    <h1 class="logo">Tristan's Daily</h1>
+    <nav class="nav">
       <button class="nav-btn active" data-view="compose">撰写</button>
-      <button class="nav-btn" data-view="categories">分类</button>
+      <button class="nav-btn" data-view="list">分类</button>
       <button class="nav-btn" data-view="featured">精选</button>
     </nav>
-    <div class="controls">
-      <button id="langToggle">EN</button>
-      <button id="themeToggle">🌙</button>
+    <div class="tool-row">
+      <button id="langBtn">EN</button>
+      <button id="themeBtn">🌙</button>
     </div>
   </aside>
 
   <main class="main">
     <section id="compose" class="view active">
-      <div class="row">
-        <input id="entryTitle" placeholder="标题" />
-        <input id="entryDate" type="date" />
-        <select id="entryType">
+      <div class="form-row">
+        <input id="titleInput" placeholder="标题" />
+        <input id="dateInput" type="date" />
+        <select id="typeInput">
           <option value="thought">随想</option>
           <option value="work">工作日志</option>
         </select>
-        <label><input id="entryFeatured" type="checkbox" /> 精选</label>
-
-        <label><input id="entryFeatured" type="checkbox" /> 精选</label>
-
+        <label><input id="featuredInput" type="checkbox" /> 精选</label>
       </div>
-      <div class="editor-layout">
-        <textarea id="markdownInput" placeholder="# 今天写点什么"></textarea>
-        <article id="markdownPreview" class="preview"></article>
+      <div class="editor-grid">
+        <textarea id="mdInput" placeholder="# 开始写今天的日志"></textarea>
+        <article id="preview" class="preview"></article>
       </div>
-      <div class="row">
+      <div class="form-row">
         <button id="saveBtn">保存</button>
-        <span id="activeEntryHint" class="note"></span>
+        <span id="editHint" class="muted"></span>
       </div>
-      <p class="note" id="publishStatus">未保存</p>
+      <p id="status" class="muted">未保存</p>
     </section>
 
-    <section id="categories" class="view">
-      <div class="row">
+    <section id="list" class="view">
+      <div class="form-row">
         <label for="filterType" id="filterLabel">类型筛选</label>
         <select id="filterType">
           <option value="all">全部</option>
@@ -59,7 +56,7 @@
     </section>
 
     <section id="featured" class="view">
-      <div id="featuredList"></div>
+      <div id="featuredPanel"></div>
     </section>
   </main>
 
