@@ -1,29 +1,22 @@
-# Tristan's Daily (Rewritten)
+# Tristan's Daily
 
-This repository was fully rewritten as a static SPA journal app.
+## 当前版本功能
+- 所有人都可以直接保存（不需要 GitHub PAT）。
+- 单按钮 `保存`：保存到浏览器本地存储（localStorage）。
+- 新增 `退出编辑`：
+  - 新建未保存文档：直接清空消失。
+  - 已有文档且有未保存改动：弹窗提醒，确认后退出。
+- 新增上传：支持 `.md` 与 `.pdf`。
+  - `.md` 可预览并导入编辑器继续编辑。
+  - `.pdf` 可在页面内预览。
 
-## What it does
-- Compose Markdown with live preview.
-- View entries by category/month.
-- Mark and view featured entries.
-- Save button writes to GitHub repo:
-  - `entries/YYYY/MM/<slug>.md`
-  - `data/entries.json`
+## 说明
+- 这个版本取消了 GitHub API 写入流程。
+- 数据保存在当前浏览器，换浏览器/清理缓存会丢失。
 
-## Required config
-`app.js` already sets:
-- owner: `boltz22172`
-- repo: `Tristan-s-Daily`
-- branch: `work`
-
-## Save flow
-1. Write content.
-2. Click `保存`.
-3. Enter GitHub PAT when prompted.
-4. Confirm success message appears.
-
-## Acceptance checklist
-1. Single `保存` button only.
-2. Can click notes from 分类 and 精选 to reopen + edit.
-3. Save creates/updates markdown file and index JSON.
-4. Theme and language switch work.
+## 验收指标
+1. 点击保存无需输入 token 即可成功。
+2. 分类/精选可点击打开并编辑。
+3. 退出编辑行为符合规则（新文档直接消失，旧文档未保存会提醒）。
+4. 上传 md 后可预览并“导入到编辑器”。
+5. 上传 pdf 后可直接预览。
