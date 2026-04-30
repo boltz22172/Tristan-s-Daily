@@ -3,7 +3,8 @@ const STORE='tristan_entries_v6', USTORE='tristan_uploads_v6', SSTORE='tristan_s
 const md=window.markdownit({html:true,linkify:true,breaks:true,typographer:true})
   .use(window.markdownitMark)
   .use(window.markdownitIns)
-  .use(window.markdownitKatex)
+  .use(window.texmath,{engine:window.katex,delimiters:'dollars',katexOptions:{throwOnError:false}})
+  .use(window.texmath,{engine:window.katex,delimiters:'brackets',katexOptions:{throwOnError:false}})
   .use(window.markdownitContainer,'comment',{render:(tokens,idx)=>tokens[idx].nesting===1?'<div class="md-comment">':'</div>'});
 const $=(id)=>document.getElementById(id);
 const dict={zh:{compose:'撰写',docs:'文档',featured:'精选',uploads:'上传文件',save:'保存',settings:'设置',language:'语言',theme:'主题',fontZh:'中文字体',fontEn:'英文字体',bgImage:'背景图片',resetBg:'重置背景',previewOpacity:'渲染区透明度',backDocs:'返回文档',setFeatured:'设为精选',thought:'随想',work:'工作日志',all:'全部',filter:'类型筛选',titlePH:'标题',mdPH:'开始写作（支持公式与代码）',unsaved:'检测到未保存内容，是否放弃并离开撰写页？',delDoc:'是否删除该文档？',delUpload:'是否删除该上传文件？',saved:'保存成功：',editing:'编辑中：',newStatus:'未保存',savedUpload:'已保存上传文件：',pdfSaved:'PDF 文档已保存'},en:{compose:'Compose',docs:'Documents',featured:'Featured',uploads:'Uploads',save:'Save',settings:'Settings',language:'Language',theme:'Theme',fontZh:'Chinese Font',fontEn:'English Font',bgImage:'Background Image',resetBg:'Reset Background',previewOpacity:'Preview Opacity',backDocs:'Back to Documents',setFeatured:'Set Featured',thought:'Thought',work:'Work Log',all:'All',filter:'Type Filter',titlePH:'Title',mdPH:'Start writing (math/code supported)',unsaved:'Unsaved changes detected. Discard and leave composer?',delDoc:'Delete this document?',delUpload:'Delete this upload?',saved:'Saved: ',editing:'Editing: ',newStatus:'Not saved',savedUpload:'Saved upload: ',pdfSaved:'PDF saved as document'}};

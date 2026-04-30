@@ -1,17 +1,14 @@
 # Tristan's Daily
 
-## Markdown 渲染重构
-- 数学公式改为 markdown-it 渲染阶段完成（KaTeX 插件），不再依赖对整棵 DOM 的事后扫描。
-- 支持：`$...$`、`\(...\)`、`$$...$$`、`\[...\]`。
-- 保留代码高亮（highlight.js），并避免公式污染 code/pre/iframe 区域。
-- 高亮继续支持 `==text==`。
-- 下划线支持：`++text++`（ins）与 `{{u:text}}`（custom underline）。
-- 新增注释块语法：
-  :::comment
-  注释内容
-  :::
-  注释块支持 Markdown、公式、高亮、下划线。
+## 修复说明
+1. Markdown 数学渲染链路重构为 `markdown-it + markdown-it-texmath + KaTeX`。
+2. 同时启用 `dollars` 与 `brackets` 分隔符，稳定支持：
+   - 行内：`$...$`、`\(...\)`
+   - 行间：`$$...$$`、`\[...\]`
+3. 保留 `markdown-it-mark`、`markdown-it-ins`、`markdown-it-container(comment)` 与 highlight.js。
+4. 移除仓库 `CNAME`，暂时禁用自定义域名跳转，优先恢复 `https://boltz22172.github.io/Tristan-s-Daily/` 可访问性。
 
-## 其他
-- 设置中心（⚙）：语言/主题/字体/背景图/渲染区透明度
-- 本地存储：`tristan_entries_v6`、`tristan_uploads_v6`、`tristan_settings_v1`
+## 存储键
+- `tristan_entries_v6`
+- `tristan_uploads_v6`
+- `tristan_settings_v1`
