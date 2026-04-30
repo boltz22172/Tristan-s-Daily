@@ -1,14 +1,13 @@
 # Tristan's Daily
 
-## 修复说明
-1. Markdown 数学渲染链路重构为 `markdown-it + markdown-it-texmath + KaTeX`。
-2. 同时启用 `dollars` 与 `brackets` 分隔符，稳定支持：
-   - 行内：`$...$`、`\(...\)`
-   - 行间：`$$...$$`、`\[...\]`
-3. 保留 `markdown-it-mark`、`markdown-it-ins`、`markdown-it-container(comment)` 与 highlight.js。
-4. 移除仓库 `CNAME`，暂时禁用自定义域名跳转，优先恢复 `https://boltz22172.github.io/Tristan-s-Daily/` 可访问性。
+## 本次改动
+1. 新增 `<注释行>` 语法：连续多行以 `<` 开头且中间无空行，会自动打包成 `:::comment ... :::` 注释块。
+2. 注释块支持 Markdown、公式、高亮、下划线。
+3. Reader 页面新增目录（TOC），可按标题自动跳转。
+4. 撰写页顶部新增：诗句、公历日期、农历日期、天气（通过浏览器定位 + open-meteo 获取）。
+5. 美术细节：背景图缩放到原来的 90%，设置区下拉和透明度滑杆宽度缩到 90%，渲染区支持半透明+可调+可缩放。
 
-## 存储键
-- `tristan_entries_v6`
-- `tristan_uploads_v6`
-- `tristan_settings_v1`
+## 数学与渲染
+- markdown-it + markdown-it-texmath + KaTeX
+- 支持 `$...$`、`\(...\)`、`$$...$$`、`\[...\]`
+- 保留 highlight.js / mark / ins / comment

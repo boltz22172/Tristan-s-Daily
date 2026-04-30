@@ -14,6 +14,7 @@
   <script src="https://cdn.jsdelivr.net/npm/markdown-it-ins@4.0.0/dist/markdown-it-ins.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/markdown-it-container@4.0.0/dist/markdown-it-container.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/markdown-it-texmath@1.0.0/texmath.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/solarlunar@2.0.7/lib/solarlunar.min.js"></script>
 </head>
 <body data-theme="light">
   <aside class="sidebar">
@@ -29,6 +30,11 @@
 
   <main class="main">
     <section id="compose" class="view active">
+      <div class="compose-header">
+        <div class="quote">大漠孤烟直，长河落日圆</div>
+        <div id="metaLine" class="meta-line"></div>
+      </div>
+
       <div class="form-row">
         <input id="titleInput" />
         <input id="dateInput" type="date" />
@@ -57,7 +63,7 @@
       <div id="filePreview" class="card"></div>
     </section>
 
-    <section id="reader" class="view"><div class="form-row"><button id="backBtn" data-i18n="backDocs"></button></div><article id="readerContent" class="preview"></article></section>
+    <section id="reader" class="view"><div class="form-row"><button id="backBtn" data-i18n="backDocs"></button></div><div class="reader-layout"><aside id="readerToc" class="card toc"></aside><article id="readerContent" class="preview"></article></div></section>
   </main>
 
   <aside id="settingsPanel" class="settings-panel hidden">
