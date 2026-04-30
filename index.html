@@ -39,22 +39,11 @@
         <article id="markdownPreview" class="preview"></article>
       </div>
 
-      <div class="publish-panel">
-        <details>
-          <summary>GitHub 发布设置（方案B）</summary>
-          <div class="grid-2">
-            <input id="ghOwner" placeholder="owner，例如 Tristan" />
-            <input id="ghRepo" placeholder="repo，例如 Tristan-s-Daily" />
-            <input id="ghBranch" placeholder="branch，例如 work" value="work" />
-            <input id="ghToken" type="password" placeholder="GitHub PAT（repo权限）" />
-          </div>
-        </details>
-        <div class="row">
-          <button id="saveDraftBtn">保存到站内数据</button>
-          <button id="publishBtn">发布到 GitHub</button>
-        </div>
-        <p class="note" id="publishStatus">未发布</p>
+      <div class="row">
+        <button id="saveBtn">保存</button>
+        <span id="activeEntryHint" class="note"></span>
       </div>
+      <p class="note" id="publishStatus">未保存</p>
 
     </section>
 
