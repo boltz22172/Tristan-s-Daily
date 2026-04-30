@@ -1,7 +1,9 @@
+
 :root { --bg: #f5efd9; --bg-panel: #fffaf0; --text: #2a2419; --accent: #4e5b3b; }
 body[data-theme="dark"] { --bg: #1f1e1a; --bg-panel: #2a2822; --text: #f2ead6; --accent: #c2b17a; }
 * { box-sizing: border-box; }
 body { margin: 0; display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; background: var(--bg); color: var(--text); font-family: "Noto Serif SC", serif; }
+
 .sidebar { padding: 20px; border-right: 1px solid #0002; }
 .nav-btn, .controls button { width: 100%; margin: 6px 0; padding: 10px; }
 .nav-btn.active { background: var(--accent); color: #fff; }
@@ -9,6 +11,7 @@ body { margin: 0; display: grid; grid-template-columns: 240px 1fr; min-height: 1
 .main { padding: 20px; }
 .view { display: none; }
 .view.active { display: block; }
+
 .row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; flex-wrap: wrap; }
 input, select, textarea, button { background: var(--bg-panel); color: var(--text); border: 1px solid #0003; padding: 8px; }
 #entryTitle { flex: 1; }
