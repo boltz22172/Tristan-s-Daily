@@ -8,9 +8,9 @@ body[style*="--font-en:georgia"]{font-family:"Georgia",serif}
 .nav-btn{display:block;width:100%;margin:8px 0;padding:10px;border-radius:12px;border:1px solid #8d6a3c44;background:#fff3d3;color:#4c361e}.nav-btn.active{background:linear-gradient(120deg,var(--accent),var(--accent-2));color:#fff}
 .tool-row{display:grid;gap:8px}.main{padding:20px 20px 20px 8px}.view{display:none}.view.active{display:block}.form-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
 input,select,textarea,button,iframe{border:1px solid var(--line);background:var(--panel);color:var(--text);padding:9px;border-radius:10px}button{cursor:pointer}#titleInput{flex:1}
-.editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}#mdInput,.preview{min-height:54vh}
-.preview{padding:16px;overflow:auto;line-height:1.8;box-shadow:var(--shadow);background:rgba(255,249,236,var(--preview-opacity));resize:both}
-#mdInput{box-shadow:var(--shadow);background:rgba(255,249,236,.82);resize:vertical}
+.editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}#mdInput,.preview{height:52vh;min-height:420px;max-height:62vh}
+.preview{padding:16px;overflow:auto;line-height:1.8;box-shadow:var(--shadow);background:rgba(255,249,236,var(--preview-opacity));resize:both;white-space:normal}
+#mdInput{box-shadow:var(--shadow);background:rgba(255,249,236,.82);resize:both;overflow:auto;white-space:pre;line-height:1.6}
 .card{border:1px solid var(--line);background:var(--panel);padding:14px;margin:12px 0;border-radius:14px;box-shadow:var(--shadow)}.muted{opacity:.9;background:var(--panel);padding:4px 8px;border-radius:8px}.pdf-frame{width:100%;height:65vh;background:#fff}
 #reader.view.active{display:block;max-height:78vh;overflow-y:auto;padding-right:4px}.reader-layout{display:grid;grid-template-columns:220px 1fr;gap:10px}.toc{max-height:70vh;overflow:auto;position:sticky;top:0}.toc-item{display:block;padding:4px 0}.toc-item.h2{padding-left:10px}.toc-item.h3{padding-left:20px}
 pre{background:#2b2119;color:#f7ebd8;padding:12px;border-radius:10px;overflow:auto}

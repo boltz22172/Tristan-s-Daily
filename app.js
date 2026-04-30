@@ -65,6 +65,20 @@ async function loadMetaLine(){
   $('metaLine').textContent=`${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 · ${lunar} · ${weather}`;
 }
 
+
+function syncPreviewFromEditor() {
+  const ta = $('mdInput');
+  const pv = $('preview');
+  const ratio = ta.scrollTop / Math.max(1, ta.scrollHeight - ta.clientHeight);
+  pv.scrollTop = ratio * Math.max(1, pv.scrollHeight - pv.clientHeight);
+}
+function syncEditorFromPreview() {
+  const ta = $('mdInput');
+  const pv = $('preview');
+  const ratio = pv.scrollTop / Math.max(1, pv.scrollHeight - pv.clientHeight);
+  ta.scrollTop = ratio * Math.max(1, ta.scrollHeight - ta.clientHeight);
+}
+
 function init(){state.entries=JSON.parse(localStorage.getItem(STORE)||'[]');state.uploads=JSON.parse(localStorage.getItem(USTORE)||'[]');state.settings={...state.settings,...JSON.parse(localStorage.getItem(SSTORE)||'{}')};$('dateInput').valueAsDate=new Date();$('langSelect').value=state.lang;$('themeSelect').value=state.settings.theme;$('fontZhSelect').value=state.settings.fontZh;$('fontEnSelect').value=state.settings.fontEn; $('previewOpacity').value=state.settings.previewOpacity || 0.75;applySettings();applyI18n();renderDocs();renderFeatured();renderUploads();renderMdInto($('preview'),'');loadMetaLine();}
 
 $('mdInput').addEventListener('input',()=>{renderMdInto($('preview'),$('mdInput').value);state.dirty=true;});$('titleInput').addEventListener('input',()=>state.dirty=true);$('typeInput').addEventListener('change',()=>state.dirty=true);$('featuredInput').addEventListener('change',()=>state.dirty=true);$('filterType').addEventListener('change',renderDocs);$('saveBtn').addEventListener('click',saveEntry);$('uploadInput').addEventListener('change',e=>handleUploads(e.target.files));$('backBtn').addEventListener('click',()=>setView('docs'));document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
@@ -79,3 +93,5 @@ $('bgResetBtn').addEventListener('click',()=>{state.settings.bgImage='';applySet
 init();
 
 $('previewOpacity').addEventListener('input',e=>{state.settings.previewOpacity=parseFloat(e.target.value);applySettings();persist();});
+$('mdInput').addEventListener('dblclick',syncPreviewFromEditor);
+$('preview').addEventListener('dblclick',syncEditorFromPreview);
