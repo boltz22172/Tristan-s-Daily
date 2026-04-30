@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tristan's Daily</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="style.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body data-theme="light">
+  <aside class="sidebar">
+    <h1 class="logo">Tristan's Daily</h1>
+    <nav class="nav">
+      <button class="nav-btn active" data-view="compose">撰写</button>
+      <button class="nav-btn" data-view="docs">文档</button>
+      <button class="nav-btn" data-view="featured">精选</button>
+      <button class="nav-btn" data-view="uploads">上传文件</button>
+    </nav>
+    <div class="tool-row">
+      <button id="langBtn">EN</button>
+      <button id="themeBtn">🌙</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <section id="compose" class="view active">
+      <div class="form-row">
+        <input id="titleInput" placeholder="标题" />
+        <input id="dateInput" type="date" />
+        <select id="typeInput"><option value="thought">随想</option><option value="work">工作日志</option></select>
+        <label><input id="featuredInput" type="checkbox" /> 精选</label>
+      </div>
+      <div class="editor-grid">
+        <textarea id="mdInput" placeholder="# 开始写今天的日志，支持 $$...$$ 与 \( ... \)"></textarea>
+        <article id="preview" class="preview"></article>
+      </div>
+      <div class="form-row">
+        <button id="saveBtn">保存</button>
+        <span id="editHint" class="muted"></span>
+      </div>
+      <p id="status" class="muted">未保存</p>
+    </section>
+
+    <section id="docs" class="view">
+      <div class="form-row">
+        <label for="filterType" id="filterLabel">类型筛选</label>
+        <select id="filterType"><option value="all">全部</option><option value="thought">随想</option><option value="work">工作日志</option></select>
+      </div>
+      <div id="timeline"></div>
+    </section>
+
+    <section id="featured" class="view"><div id="featuredPanel"></div></section>
+
+    <section id="uploads" class="view">
+      <div class="form-row"><input id="uploadInput" type="file" accept=".md,.pdf,text/markdown,application/pdf" multiple /></div>
+      <div id="uploadList"></div>
+      <div id="filePreview" class="card"></div>
+    </section>
+
+    <section id="reader" class="view">
+      <div class="form-row"><button id="backBtn">返回文档</button></div>
+      <article id="readerContent" class="preview"></article>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
