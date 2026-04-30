@@ -1,0 +1,22 @@
+[
+  {
+    "id": "2026-04-28-thought-chun-ri-sui-xiang",
+    "title": "春日随想",
+    "date": "2026-04-28",
+    "type": "thought",
+    "featured": true,
+    "lastEdited": "2026-04-29T10:30:00Z",
+    "filePath": "entries/2026/04/chun-ri-sui-xiang.md",
+    "content": "# 春日随想\n\n今天把日志系统整体重写了一遍。"
+  },
+  {
+    "id": "2026-04-27-work-xiang-mu-zhou-bao",
+    "title": "项目周报",
+    "date": "2026-04-27",
+    "type": "work",
+    "featured": false,
+    "lastEdited": "2026-04-27T18:00:00Z",
+    "filePath": "entries/2026/04/xiang-mu-zhou-bao.md",
+    "content": "# 项目周报\n\n- 完成重构\n- 修复可点开编辑功能"
+  }
+]
