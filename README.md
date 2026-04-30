@@ -1,19 +1,17 @@
 # Tristan's Daily
 
-## 本次 UI 调整
-1. 侧边栏改为圆角卡片式（含圆角边框与悬浮层次）。
-2. 文档浏览页（reader）改为独立滚动区域，背景保持固定不滑动。
-3. 设置面板中的下拉框宽度缩小，视觉更紧凑。
-4. 撰写时的渲染区改为半透明材质，并新增“渲染区透明度”滑杆可调。
+## Markdown 渲染重构
+- 数学公式改为 markdown-it 渲染阶段完成（KaTeX 插件），不再依赖对整棵 DOM 的事后扫描。
+- 支持：`$...$`、`\(...\)`、`$$...$$`、`\[...\]`。
+- 保留代码高亮（highlight.js），并避免公式污染 code/pre/iframe 区域。
+- 高亮继续支持 `==text==`。
+- 下划线支持：`++text++`（ins）与 `{{u:text}}`（custom underline）。
+- 新增注释块语法：
+  :::comment
+  注释内容
+  :::
+  注释块支持 Markdown、公式、高亮、下划线。
 
-## 设置中心(⚙)
-- 语言（中/英）
-- 主题（亮/暗）
-- 中文/英文字体
-- 背景图上传与重置
-- 渲染区透明度
-
-## 本地存储键
-- `tristan_entries_v6`
-- `tristan_uploads_v6`
-- `tristan_settings_v1`
+## 其他
+- 设置中心（⚙）：语言/主题/字体/背景图/渲染区透明度
+- 本地存储：`tristan_entries_v6`、`tristan_uploads_v6`、`tristan_settings_v1`
