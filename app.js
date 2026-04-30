@@ -87,12 +87,12 @@ function renderFeatured() {
 function saveUploadAsEntry(file) {
   const type = $('uploadType').value;
   const featured = $('uploadFeatured').checked;
-  if (file.kind !== 'md') return;
   const now = new Date();
   const date = now.toISOString().slice(0,10);
   const title = file.name.replace(/\.md$/i,'');
   const id = `${date}-${type}-${title.toLowerCase().replace(/\s+/g,'-')}`;
-  const e = { id, title, date, type, featured, content: file.content, lastEdited: now.toISOString() };
+  const content = file.kind === 'md' ? file.content : `# ${title}\n\n> PDF 文档已保存\n\n<iframe src="${file.content}" style="width:100%;height:70vh;border:1px solid #ccc;border-radius:8px;"></iframe>`;
+  const e = { id, title, date, type, featured, content, lastEdited: now.toISOString() };
   const i = state.entries.findIndex((x)=>x.id===id);
   if(i>=0) state.entries[i]=e; else state.entries.push(e);
   persist(); renderDocs(); renderFeatured();
@@ -102,9 +102,7 @@ function renderUploads() {
   const list = $('uploadList'); list.innerHTML = '';
   state.uploads.forEach((f, idx) => {
     const row = document.createElement('div'); row.className = 'form-row card';
-    row.innerHTML = f.kind === 'md'
-      ? `<span>${f.name} (md)</span><button class="open-u">浏览</button><button class="save-u">保存到文档</button><button class="del-u">删除</button>`
-      : `<span>${f.name} (pdf)</span><button class="open-u">浏览</button><button class="del-u">删除</button>`;
+    row.innerHTML = `<span>${f.name} (${f.kind})</span><button class="open-u">浏览</button><button class="save-u">保存到文档</button><button class="del-u">删除</button>`;
     row.querySelector('.open-u').onclick = () => openUpload(idx);
     const saveBtn = row.querySelector('.save-u');
     if (saveBtn) saveBtn.onclick = () => { saveUploadAsEntry(f); $('status').textContent = `已保存上传文件：${f.name}`; };
@@ -153,5 +151,6 @@ $('backBtn').addEventListener('click', ()=>setView('docs'));
 document.querySelectorAll('.nav-btn').forEach((b)=>b.addEventListener('click', ()=>setView(b.dataset.view)));
 $('langBtn').addEventListener('click', ()=>{ state.lang = state.lang==='zh'?'en':'zh'; $('langBtn').textContent = state.lang==='zh'?'EN':'中'; });
 $('themeBtn').addEventListener('click', ()=>{ document.body.dataset.theme = document.body.dataset.theme==='dark'?'light':'dark'; });
+$('fontBtn').addEventListener('click', ()=>{ document.body.classList.toggle('font-alt'); $('fontBtn').textContent = document.body.classList.contains('font-alt') ? 'Georgia' : 'Times'; });
 
 init();
