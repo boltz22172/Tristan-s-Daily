@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tristan's Daily</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body data-theme="light">
+  <aside class="sidebar">
+    <h1>Tristan's Daily</h1>
+    <nav>
+      <button class="nav-btn active" data-view="compose">撰写</button>
+      <button class="nav-btn" data-view="categories">分类</button>
+      <button class="nav-btn" data-view="featured">精选</button>
+    </nav>
+    <div class="controls">
+      <button id="langToggle">EN</button>
+      <button id="themeToggle">🌙</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <section id="compose" class="view active">
+      <div class="row">
+        <input id="entryTitle" placeholder="标题" />
+        <input id="entryDate" type="date" />
+        <select id="entryType">
+          <option value="thought">随想</option>
+          <option value="work">工作日志</option>
+        </select>
+      </div>
+      <div class="editor-layout">
+        <textarea id="markdownInput" placeholder="# 今天写点什么"></textarea>
+        <article id="markdownPreview" class="preview"></article>
+      </div>
+      <p class="note" id="composeNote">第一版暂不支持直接写入 GitHub 仓库，先用于内容草拟与预览。</p>
+    </section>
+
+    <section id="categories" class="view">
+      <div class="row">
+        <label for="filterType" id="filterLabel">类型筛选</label>
+        <select id="filterType">
+          <option value="all">全部</option>
+          <option value="thought">随想</option>
+          <option value="work">工作日志</option>
+        </select>
+      </div>
+      <div id="timeline"></div>
+    </section>
+
+    <section id="featured" class="view">
+      <div id="featuredList"></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
