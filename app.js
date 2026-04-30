@@ -1,3 +1,5 @@
+const REPO_CONFIG = { owner: 'boltz22172', repo: 'Tristan-s-Daily', branch: 'work' };
+const state = { lang: 'zh', entries: [], activeEntryId: null };
 
 const REPO_CONFIG = { owner: 'YOUR_GITHUB_OWNER', repo: 'Tristan-s-Daily', branch: 'work' };
 const state = { lang: 'zh', entries: [], activeEntryId: null };
