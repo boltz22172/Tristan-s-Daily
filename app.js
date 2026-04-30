@@ -4,8 +4,8 @@ const t = {
   en: { compose: 'Compose', docs: 'Docs', featured: 'Featured', uploads: 'Uploads', title: 'Title', all: 'All', thought: 'Thought', work: 'Work Log', typeFilter: 'Type' }
 };
 const $ = (id) => document.getElementById(id);
-const STORE = 'tristan_entries_v3';
-const UPLOAD_STORE = 'tristan_uploads_v3';
+const STORE = 'tristan_entries_v4';
+const UPLOAD_STORE = 'tristan_uploads_v4';
 const EDIT_VIEWS = new Set(['docs', 'featured', 'uploads', 'reader']);
 
 function renderMdInto(el, md) {
@@ -14,12 +14,16 @@ function renderMdInto(el, md) {
     window.renderMathInElement(el, {
       delimiters: [
         { left: '$$', right: '$$', display: true },
-        { left: '\\[', right: '\\]', display: true },
-        { left: '\\(', right: '\\)', display: false }
+        { left: '\[', right: '\]', display: true },
+        { left: '$', right: '$', display: false },
+        { left: '\(', right: '\)', display: false }
       ]
     });
   }
 }
+
+function persistEntries() { localStorage.setItem(STORE, JSON.stringify(state.entries)); }
+function persistUploads() { localStorage.setItem(UPLOAD_STORE, JSON.stringify(state.uploads)); }
 
 function resetComposer() {
   state.activeId = null;
@@ -33,13 +37,20 @@ function resetComposer() {
   state.dirty = false;
 }
 
+function canLeaveCompose() {
+  const inCompose = document.getElementById('compose').classList.contains('active');
+  if (!inCompose || !state.dirty) return true;
+  return window.confirm('检测到未保存内容，是否放弃并离开撰写页？');
+}
+
 function setView(view) {
+  if (!canLeaveCompose()) return;
   if (EDIT_VIEWS.has(view)) resetComposer();
   document.querySelectorAll('.view').forEach((v) => v.classList.toggle('active', v.id === view));
   document.querySelectorAll('.nav-btn').forEach((b) => b.classList.toggle('active', b.dataset.view === view));
 }
 
-function slug(s) { return s.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9\-\u4e00-\u9fa5]/g, ''); }
+function slug(s) { return s.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9\-一-龥]/g, ''); }
 function applyI18n() {
   const lang = t[state.lang];
   const nav = document.querySelectorAll('.nav-btn');
@@ -49,8 +60,6 @@ function applyI18n() {
   document.querySelector('#filterType option[value="thought"]').textContent = lang.thought;
   document.querySelector('#filterType option[value="work"]').textContent = lang.work;
 }
-function persistEntries() { localStorage.setItem(STORE, JSON.stringify(state.entries)); }
-function persistUploads() { localStorage.setItem(UPLOAD_STORE, JSON.stringify(state.uploads)); }
 
 function currentEntryFromForm() {
   const title = $('titleInput').value.trim() || 'Untitled';
@@ -74,8 +83,20 @@ function editEntry(entry) {
 }
 
 function browseEntry(entry) {
-  renderMdInto($('readerContent'), `# ${entry.title}\n\n${entry.content || ''}`);
+  renderMdInto($('readerContent'), `# ${entry.title}
+
+${entry.content || ''}`);
   document.querySelectorAll('.view').forEach((v) => v.classList.toggle('active', v.id === 'reader'));
+}
+
+function deleteEntry(id) {
+  if (!window.confirm('是否删除该文档？')) return;
+  state.entries = state.entries.filter((e) => e.id !== id);
+  persistEntries();
+  renderDocs();
+  renderFeatured();
+  if (state.activeId === id) resetComposer();
+  $('status').textContent = '已删除文档';
 }
 
 function saveEntry() {
@@ -95,9 +116,10 @@ function renderDocs() {
     const card = document.createElement('div'); card.className = 'card'; card.innerHTML = `<h3>${month}</h3>`;
     byMonth[month].forEach((e) => {
       const row = document.createElement('div'); row.className = 'form-row';
-      row.innerHTML = `<span>${e.date} · ${e.title} (${e.type})</span><button class="browse-btn">浏览</button><button class="edit-btn">编辑</button>`;
+      row.innerHTML = `<span>${e.date} · ${e.title} (${e.type})</span><button class="browse-btn">浏览</button><button class="edit-btn">编辑</button><button class="delete-btn">删除</button>`;
       row.querySelector('.browse-btn').addEventListener('click', () => browseEntry(e));
       row.querySelector('.edit-btn').addEventListener('click', () => editEntry(e));
+      row.querySelector('.delete-btn').addEventListener('click', () => deleteEntry(e.id));
       card.appendChild(row);
     });
     target.appendChild(card);
@@ -108,9 +130,10 @@ function renderFeatured() {
   const target = $('featuredPanel'); target.innerHTML = '';
   state.entries.filter((e) => e.featured).forEach((e) => {
     const card = document.createElement('article'); card.className = 'card';
-    card.innerHTML = `<h3>${e.title}</h3><p>${e.date}</p><div class="form-row"><button class="browse-btn">浏览</button><button class="edit-btn">编辑</button></div>`;
+    card.innerHTML = `<h3>${e.title}</h3><p>${e.date}</p><div class="form-row"><button class="browse-btn">浏览</button><button class="edit-btn">编辑</button><button class="delete-btn">删除</button></div>`;
     card.querySelector('.browse-btn').addEventListener('click', () => browseEntry(e));
     card.querySelector('.edit-btn').addEventListener('click', () => editEntry(e));
+    card.querySelector('.delete-btn').addEventListener('click', () => deleteEntry(e.id));
     target.appendChild(card);
   });
 }
@@ -121,7 +144,7 @@ function openUpload(idx) {
   if (f.kind === 'md') {
     target.innerHTML = `<h3>${f.name}</h3><p>最后编辑：${new Date(f.lastEdited).toLocaleString()}</p><button id="importMd">导入到编辑器</button><div id="mdUploaded"></div>`;
     renderMdInto($('mdUploaded'), f.content);
-    $('importMd').addEventListener('click', () => { $('titleInput').value = f.name.replace(/\.md$/i, ''); $('mdInput').value = f.content; renderMdInto($('preview'), f.content); document.querySelectorAll('.view').forEach((v) => v.classList.toggle('active', v.id === 'compose')); });
+    $('importMd').addEventListener('click', () => { $('titleInput').value = f.name.replace(/\.md$/i, ''); $('mdInput').value = f.content; renderMdInto($('preview'), f.content); document.querySelectorAll('.view').forEach((v) => v.classList.toggle('active', v.id === 'compose')); state.dirty = true; });
   } else target.innerHTML = `<h3>${f.name}</h3><iframe src="${f.content}" class="pdf-frame"></iframe>`;
 }
 async function handleUploads(files) { for (const file of files) { if (file.name.toLowerCase().endsWith('.md')) { const content = await file.text(); state.uploads.push({ name: file.name, kind: 'md', content, lastEdited: new Date().toISOString() }); } else if (file.name.toLowerCase().endsWith('.pdf')) { const dataUrl = await new Promise((resolve) => { const r = new FileReader(); r.onload = () => resolve(r.result); r.readAsDataURL(file); }); state.uploads.push({ name: file.name, kind: 'pdf', content: dataUrl, lastEdited: new Date().toISOString() }); } } persistUploads(); renderUploads(); }
