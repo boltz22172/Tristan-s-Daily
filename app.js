@@ -1,17 +1,32 @@
-const state = { lang: 'zh', entries: [], uploads: [], activeId: null, dirty: false, settings: { theme:'light', fontZh:'kaiti', fontEn:'times', bgImage:'', previewOpacity:0.75 } };
+const state = { lang: 'zh', entries: [], uploads: [], activeId: null, dirty: false, settings: { theme:'desert', fontZh:'kaiti', fontEn:'times', previewOpacity:0.75 } };
 const STORE='tristan_entries_v6', USTORE='tristan_uploads_v6', SSTORE='tristan_settings_v1';
+const FONT_STACKS = {
+  xingkai: '"STXingkai","KaiTi","Kaiti SC","DFKai-SB",cursive',
+  kaiti: '"STKaiti","KaiTi","Kaiti SC",serif',
+  song: '"Songti SC","SimSun","PMingLiU",serif',
+  hei: '"PingFang SC","Microsoft YaHei","Heiti SC",sans-serif',
+  times: '"Times New Roman",serif',
+  georgia: 'Georgia,serif',
+};
+const THEMES = {
+  desert: { quote: '大漠孤烟直，长河落日圆', bg: '#efe2c8', image: 'picture/bg_sand.png', bodyBg: 'linear-gradient(120deg,#f7ebd34d,#0000 45%)' },
+  snow: { quote: '柴门闻犬吠，风雪夜归人', bg: '#eef3f8', image: 'picture/bg_ice.png', bodyBg: 'linear-gradient(120deg,#ffffff66,#d9e6f04d 45%)' },
+  bamboo: { quote: '苍苍竹林寺，杳杳钟声晚', bg: '#e6f2e5', image: 'picture/bg_bamboo.png', bodyBg: 'linear-gradient(120deg,#f3fff34d,#c7e2cb4d 45%)' },
+  smoke: { quote: '凭君莫话封侯事，一将功成万骨枯', bg: '#f3d9d4', image: 'picture/bg_cloud.png', bodyBg: 'linear-gradient(120deg,#e14b3e55,#f8d4d055 45%)' },
+  rain: { quote: '雨急山溪涨，云迷岭树低', bg: '#d8e2f0', image: 'picture/bg_rain.png', bodyBg: 'linear-gradient(120deg,#1c355d55,#6b8ecb44 45%)' },
+  thunder: { quote: '青海长云暗雪山，孤城遥望玉门关', bg: '#ece7f6', image: 'picture/bg_thunder.png', bodyBg: 'linear-gradient(120deg,#d8c7ff66,#f6f3ff55 45%)' },
+};
 const md=window.markdownit({html:true,linkify:true,breaks:true,typographer:true})
   .use(window.markdownitMark)
   .use(window.markdownitIns)
   .use(window.texmath,{engine:window.katex,delimiters:'dollars',katexOptions:{throwOnError:false}})
   .use(window.texmath,{engine:window.katex,delimiters:'brackets',katexOptions:{throwOnError:false}})
+  .use(window.markdownitContainer,'quote',{render:(tokens,idx)=>tokens[idx].nesting===1?'<blockquote class="md-quote">':'</blockquote>'})
   .use(window.markdownitContainer,'comment',{render:(tokens,idx)=>tokens[idx].nesting===1?'<div class="md-comment">':'</div>'});
 
-// Treat markdown blockquotes as comment blocks (only at markdown token level, no raw text preprocessing)
-const _bqOpen = md.renderer.rules.blockquote_open || (() => '<blockquote>');
-const _bqClose = md.renderer.rules.blockquote_close || (() => '</blockquote>');
-md.renderer.rules.blockquote_open = () => '<div class="md-comment">';
-md.renderer.rules.blockquote_close = () => '</div>';
+// Keep native blockquotes available, but render the quote container with the same look.
+md.renderer.rules.blockquote_open = () => '<blockquote class="md-quote">';
+md.renderer.rules.blockquote_close = () => '</blockquote>';
 
 // Custom underline syntax: {{u:text}} -> <u>text</u>, token-safe on inline text tokens only
 md.core.ruler.push('custom_underline', (state) => {
@@ -47,14 +62,190 @@ md.core.ruler.push('custom_underline', (state) => {
   }
 });
 const $=(id)=>document.getElementById(id);
-const dict={zh:{compose:'撰写',docs:'文档',featured:'精选',uploads:'上传文件',save:'保存',settings:'设置',language:'语言',theme:'主题',fontZh:'中文字体',fontEn:'英文字体',bgImage:'背景图片',resetBg:'重置背景',previewOpacity:'渲染区透明度',backDocs:'返回文档',setFeatured:'设为精选',thought:'随想',work:'工作日志',all:'全部',filter:'类型筛选',titlePH:'标题',mdPH:'开始写作（支持公式与代码）',unsaved:'检测到未保存内容，是否放弃并离开撰写页？',delDoc:'是否删除该文档？',delUpload:'是否删除该上传文件？',saved:'保存成功：',editing:'编辑中：',newStatus:'未保存',savedUpload:'已保存上传文件：',pdfSaved:'PDF 文档已保存'},en:{compose:'Compose',docs:'Documents',featured:'Featured',uploads:'Uploads',save:'Save',settings:'Settings',language:'Language',theme:'Theme',fontZh:'Chinese Font',fontEn:'English Font',bgImage:'Background Image',resetBg:'Reset Background',previewOpacity:'Preview Opacity',backDocs:'Back to Documents',setFeatured:'Set Featured',thought:'Thought',work:'Work Log',all:'All',filter:'Type Filter',titlePH:'Title',mdPH:'Start writing (math/code supported)',unsaved:'Unsaved changes detected. Discard and leave composer?',delDoc:'Delete this document?',delUpload:'Delete this upload?',saved:'Saved: ',editing:'Editing: ',newStatus:'Not saved',savedUpload:'Saved upload: ',pdfSaved:'PDF saved as document'}};
+const dict={zh:{compose:'撰写',docs:'文档',featured:'精选',uploads:'上传文件',save:'保存',settings:'设置',language:'语言',theme:'主题',fontZh:'中文字体',fontEn:'英文字体',previewOpacity:'渲染区透明度',backDocs:'返回文档',setFeatured:'设为精选',thought:'随想',work:'工作日志',all:'全部',filter:'类型筛选',titlePH:'标题',mdPH:'开始写作（支持公式与代码）',unsaved:'检测到未保存内容，是否放弃并离开撰写页？',delDoc:'是否删除该文档？',delUpload:'是否删除该上传文件？',saved:'保存成功：',editing:'编辑中：',newStatus:'未保存',savedUpload:'已保存上传文件：',pdfSaved:'PDF 文档已保存'},en:{compose:'Compose',docs:'Documents',featured:'Featured',uploads:'Uploads',save:'Save',settings:'Settings',language:'Language',theme:'Theme',fontZh:'Chinese Font',fontEn:'English Font',previewOpacity:'Preview Opacity',backDocs:'Back to Documents',setFeatured:'Set Featured',thought:'Thought',work:'Work Log',all:'All',filter:'Type Filter',titlePH:'Title',mdPH:'Start writing (math/code supported)',unsaved:'Unsaved changes detected. Discard and leave composer?',delDoc:'Delete this document?',delUpload:'Delete this upload?',saved:'Saved: ',editing:'Editing: ',newStatus:'Not saved',savedUpload:'Saved upload: ',pdfSaved:'PDF saved as document'}};
 
 function t(k){return dict[state.lang][k]||k;}
 function persist(){localStorage.setItem(STORE,JSON.stringify(state.entries));localStorage.setItem(USTORE,JSON.stringify(state.uploads));localStorage.setItem(SSTORE,JSON.stringify(state.settings));}
-function renderMdInto(el,text){el.innerHTML=md.render(text||'');el.querySelectorAll('pre code').forEach(b=>window.hljs&&window.hljs.highlightElement(b));}
-function applySettings(){document.body.dataset.theme=state.settings.theme;document.body.style.setProperty('--font-zh',state.settings.fontZh);document.body.style.setProperty('--font-en',state.settings.fontEn);document.body.style.backgroundImage=state.settings.bgImage?`linear-gradient(120deg,#f7ebd34d,#0000 45%),url('${state.settings.bgImage}')`:'none';document.body.style.backgroundColor='#efe2c8';
+function normalizeMarkdownSource(text){
+  const lines=String(text||'').replace(/\r\n/g,'\n').split('\n');
+  const output=[];
+  let inFence=false;
+  let fenceMarker='';
+  let inQuote=false;
+  let displayMode=null;
+  let pendingBlank=false;
+
+  const quotePrefix=(line)=>line.match(/^(\s*(?:>\s*)+)/)?.[1]||'';
+  const stripQuotePrefix=(line)=>line.replace(/^(\s*(?:>\s*)+)/,'');
+  const isBlank=(line)=>line.trim()==='';
+  const fenceStart=(line)=>line.match(/^(\s*)(```|~~~)/);
+  const isDollarLine=(content)=>/^\$\$\s*$/.test(content);
+  const isBracketOpen=(content)=>/^\\\[\s*$/.test(content);
+  const isBracketClose=(content)=>/^\\\]\s*$/.test(content);
+
+  const openQuote=()=>{
+    if(!inQuote){
+      output.push(':::quote');
+      inQuote=true;
+    }
+  };
+  const closeQuote=()=>{
+    if(inQuote){
+      output.push(':::');
+      inQuote=false;
+    }
+  };
+
+  for(const line of lines){
+    const fenceMatch=fenceStart(line);
+    if(fenceMatch){
+      closeQuote();
+      if(!inFence){
+        inFence=true;
+        fenceMarker=fenceMatch[2];
+      }else if(line.trimStart().startsWith(fenceMarker)){
+        inFence=false;
+        fenceMarker='';
+      }
+      output.push(line);
+      continue;
+    }
+
+    if(inFence){
+      output.push(line);
+      continue;
+    }
+
+    const prefix=quotePrefix(line);
+    const content=stripQuotePrefix(line).trim();
+    const blankLine=isBlank(line);
+    const quoteLine=prefix!=='' || (inQuote && !blankLine);
+    const dollarLine=isDollarLine(content);
+    const bracketOpen=isBracketOpen(content);
+    const bracketClose=isBracketClose(content);
+
+    if(quoteLine){
+      openQuote();
+      if(pendingBlank){
+        output.push('');
+        pendingBlank=false;
+      }
+      if(displayMode==='dollar' && dollarLine){
+        output.push(stripQuotePrefix(line));
+        displayMode=null;
+        pendingBlank=true;
+        continue;
+      }
+      if(displayMode==='bracket' && bracketClose){
+        output.push(stripQuotePrefix(line));
+        displayMode=null;
+        pendingBlank=true;
+        continue;
+      }
+      if(displayMode===null && dollarLine){
+        if(output.length===0 || output[output.length-1] !== '') output.push('');
+        output.push(stripQuotePrefix(line));
+        displayMode='dollar';
+        continue;
+      }
+      if(displayMode===null && bracketOpen){
+        if(output.length===0 || output[output.length-1] !== '') output.push('');
+        output.push(stripQuotePrefix(line));
+        displayMode='bracket';
+        continue;
+      }
+      output.push(stripQuotePrefix(line));
+      continue;
+    }
+
+    if(blankLine){
+      if(inQuote){
+        output.push('');
+        pendingBlank=false;
+        continue;
+      }
+      if(pendingBlank){
+        output.push('');
+        pendingBlank=false;
+        continue;
+      }
+      output.push('');
+      continue;
+    }
+
+    closeQuote();
+
+    if(displayMode===null){
+      if(dollarLine){
+        output.push('');
+        output.push(line);
+        displayMode='dollar';
+        continue;
+      }
+      if(bracketOpen){
+        output.push('');
+        output.push(line);
+        displayMode='bracket';
+        continue;
+      }
+    }else if(displayMode==='dollar' && dollarLine){
+      output.push(line);
+      displayMode=null;
+      pendingBlank=true;
+      continue;
+    }else if(displayMode==='bracket' && bracketClose){
+      output.push(line);
+      displayMode=null;
+      pendingBlank=true;
+      continue;
+    }
+
+    if(pendingBlank){
+      output.push('');
+      pendingBlank=false;
+    }
+    output.push(line);
+  }
+
+  closeQuote();
+
+  return output.join('\n');
+}
+function renderMdInto(el,text){el.innerHTML=md.render(normalizeMarkdownSource(text));el.querySelectorAll('pre code').forEach(b=>window.hljs&&window.hljs.highlightElement(b));}
+function hexToRgb(hex){
+  const value = hex.replace('#','').trim();
+  const normalized = value.length===3 ? value.split('').map(ch=>ch+ch).join('') : value;
+  const num = Number.parseInt(normalized,16);
+  return { r:(num>>16)&255, g:(num>>8)&255, b:num&255 };
+}
+function applySettings(){const theme=THEMES[state.settings.theme]||THEMES.desert;state.settings.theme=THEMES[state.settings.theme]?state.settings.theme:'desert';document.body.dataset.theme=state.settings.theme;document.body.style.setProperty('--font-zh',FONT_STACKS[state.settings.fontZh]||FONT_STACKS.kaiti);document.body.style.setProperty('--font-en',FONT_STACKS[state.settings.fontEn]||FONT_STACKS.times);document.body.style.backgroundImage=`${theme.bodyBg},url('${theme.image}')`;document.body.style.backgroundColor=theme.bg;const quote=$('themeQuote');if(quote)quote.textContent=theme.quote;
+  const {r,g,b}=hexToRgb(theme.bg);
+  document.documentElement.style.setProperty('--editor-surface', `rgba(${r},${g},${b},${state.settings.previewOpacity||0.75})`);
   document.documentElement.style.setProperty('--preview-opacity', String(state.settings.previewOpacity||0.75));}
-function applyI18n(){document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));$('titleInput').placeholder=t('titlePH');$('mdInput').placeholder=t('mdPH');$('filterLabel').textContent=t('filter');$('status').textContent=t('newStatus');$('typeInput').options[0].text=t('thought');$('typeInput').options[1].text=t('work');$('filterType').options[0].text=t('all');$('filterType').options[1].text=t('thought');$('filterType').options[2].text=t('work');$('uploadType').options[0].text=t('thought');$('uploadType').options[1].text=t('work');}
+function applyI18n(){document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));$('titleInput').placeholder=t('titlePH');$('mdInput').placeholder=t('mdPH');$('filterLabel').textContent=t('filter');$('status').textContent=t('newStatus');$('typeInput').options[0].text=t('thought');$('typeInput').options[1].text=t('work');$('filterType').options[0].text=t('all');$('filterType').options[1].text=t('thought');$('filterType').options[2].text=t('work');$('uploadType').options[0].text=t('thought');$('uploadType').options[1].text=t('work');const quote=$('themeQuote');if(quote)quote.textContent=(THEMES[state.settings.theme]||THEMES.desert).quote;}
+
+function weatherText(code){
+  if(code===0) return '晴';
+  if(code===1) return '大部晴朗';
+  if(code===2) return '多云';
+  if(code===3) return '阴';
+  if(code===45 || code===48) return '雾';
+  if(code===51 || code===53 || code===55) return '毛毛雨';
+  if(code===56 || code===57) return '冻毛毛雨';
+  if(code===61 || code===63 || code===65) return '雨';
+  if(code===66 || code===67) return '冻雨';
+  if(code===71 || code===73 || code===75) return '雪';
+  if(code===77) return '阵雪';
+  if(code===80 || code===81 || code===82) return '阵雨';
+  if(code===85 || code===86) return '阵雪';
+  if(code===95) return '雷暴';
+  if(code===96 || code===99) return '雷暴伴冰雹';
+  return '天气未知';
+}
+
+function cityText(place){
+  return place?.city || place?.locality || place?.town || place?.village || place?.county || place?.principalSubdivision || '未知城市';
+}
 
 function setView(v){if($('compose').classList.contains('active')&&state.dirty&&!confirm(t('unsaved')))return;if(v!=='compose')resetCompose();document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id===v));document.querySelectorAll('.nav-btn').forEach(x=>x.classList.toggle('active',x.dataset.view===v));}
 function resetCompose(){state.activeId=null;$('titleInput').value='';$('dateInput').valueAsDate=new Date();$('typeInput').value='thought';$('featuredInput').checked=false;$('mdInput').value='';renderMdInto($('preview'),'');$('editHint').textContent='';state.dirty=false;}
@@ -76,15 +267,28 @@ async function loadMetaLine(){
   const now=new Date();
   let lunar='';
   try{const l=window.solarlunar.solar2lunar(now.getFullYear(),now.getMonth()+1,now.getDate());lunar=`农历${l.monthCn}${l.dayCn}`;}catch{}
+  let city='未知城市';
   let weather='';
+  let latitude=null;
+  let longitude=null;
   try{
     const pos=await new Promise((res,rej)=>navigator.geolocation?navigator.geolocation.getCurrentPosition(res,rej,{timeout:5000}):rej());
-    const {latitude,longitude}=pos.coords;
-    const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code`);
-    const j=await r.json();
-    weather=`${Math.round(j.current.temperature_2m)}°C`;
-  }catch{weather='天气获取失败';}
-  $('metaLine').textContent=`${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 · ${lunar} · ${weather}`;
+    latitude=pos.coords.latitude;
+    longitude=pos.coords.longitude;
+  }catch{}
+  if(latitude!==null && longitude!==null){
+    try{
+      const geoRes=await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=zh-CN`);
+      const geoJson=await geoRes.json();
+      city=cityText(geoJson);
+    }catch{}
+    try{
+      const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code`);
+      const j=await r.json();
+      weather=`${weatherText(j.current.weather_code)} · ${Math.round(j.current.temperature_2m)}°C`;
+    }catch{}
+  }
+  $('metaLine').textContent=`${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 · ${lunar} · 📍${city} · ${weather}`;
 }
 
 
@@ -101,7 +305,7 @@ function syncEditorFromPreview() {
   ta.scrollTop = ratio * Math.max(1, ta.scrollHeight - ta.clientHeight);
 }
 
-function init(){state.entries=JSON.parse(localStorage.getItem(STORE)||'[]');state.uploads=JSON.parse(localStorage.getItem(USTORE)||'[]');state.settings={...state.settings,...JSON.parse(localStorage.getItem(SSTORE)||'{}')};$('dateInput').valueAsDate=new Date();$('langSelect').value=state.lang;$('themeSelect').value=state.settings.theme;$('fontZhSelect').value=state.settings.fontZh;$('fontEnSelect').value=state.settings.fontEn; $('previewOpacity').value=state.settings.previewOpacity || 0.75;applySettings();applyI18n();renderDocs();renderFeatured();renderUploads();renderMdInto($('preview'),'');loadMetaLine();}
+function init(){state.entries=JSON.parse(localStorage.getItem(STORE)||'[]');state.uploads=JSON.parse(localStorage.getItem(USTORE)||'[]');state.settings={...state.settings,...JSON.parse(localStorage.getItem(SSTORE)||'{}')};if(state.settings.theme==='light'||state.settings.theme==='dark')state.settings.theme='desert';$('dateInput').valueAsDate=new Date();$('langSelect').value=state.lang;$('themeSelect').value=state.settings.theme;$('fontZhSelect').value=state.settings.fontZh;$('fontEnSelect').value=state.settings.fontEn; $('previewOpacity').value=state.settings.previewOpacity || 0.75;applySettings();applyI18n();renderDocs();renderFeatured();renderUploads();renderMdInto($('preview'),'');loadMetaLine();}
 
 $('mdInput').addEventListener('input',()=>{renderMdInto($('preview'),$('mdInput').value);state.dirty=true;});$('titleInput').addEventListener('input',()=>state.dirty=true);$('typeInput').addEventListener('change',()=>state.dirty=true);$('featuredInput').addEventListener('change',()=>state.dirty=true);$('filterType').addEventListener('change',renderDocs);$('saveBtn').addEventListener('click',saveEntry);$('uploadInput').addEventListener('change',e=>handleUploads(e.target.files));$('backBtn').addEventListener('click',()=>setView('docs'));document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
 $('settingsBtn').addEventListener('click',()=>$('settingsPanel').classList.toggle('hidden'));
@@ -109,8 +313,6 @@ $('langSelect').addEventListener('change',e=>{state.lang=e.target.value;applyI18
 $('themeSelect').addEventListener('change',e=>{state.settings.theme=e.target.value;applySettings();persist();});
 $('fontZhSelect').addEventListener('change',e=>{state.settings.fontZh=e.target.value;applySettings();persist();});
 $('fontEnSelect').addEventListener('change',e=>{state.settings.fontEn=e.target.value;applySettings();persist();});
-$('bgUpload').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;const data=await new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(f);});state.settings.bgImage=data;applySettings();persist();});
-$('bgResetBtn').addEventListener('click',()=>{state.settings.bgImage='';applySettings();persist();});
 
 init();
 
