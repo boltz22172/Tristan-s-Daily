@@ -10,7 +10,7 @@ const FONT_STACKS = {
 };
 const THEMES = {
   desert: { quote: '大漠孤烟直，长河落日圆', bg: '#efe2c8', image: 'picture/bg_sand.png', bodyBg: 'linear-gradient(120deg,#f7ebd34d,#0000 45%)' },
-  snow: { quote: '柴门闻犬吠，风雪夜归人', bg: '#eef3f8', image: 'picture/bg_ice.png', bodyBg: 'linear-gradient(120deg,#ffffff66,#d9e6f04d 45%)' },
+  snow: { quote: '风雪压庙门，一夜换乾坤', bg: '#eef3f8', image: 'picture/bg_ice.png', bodyBg: 'linear-gradient(120deg,#ffffff66,#d9e6f04d 45%)' },
   bamboo: { quote: '苍苍竹林寺，杳杳钟声晚', bg: '#e6f2e5', image: 'picture/bg_bamboo.png', bodyBg: 'linear-gradient(120deg,#f3fff34d,#c7e2cb4d 45%)' },
   smoke: { quote: '凭君莫话封侯事，一将功成万骨枯', bg: '#f3d9d4', image: 'picture/bg_cloud.png', bodyBg: 'linear-gradient(120deg,#e14b3e55,#f8d4d055 45%)' },
   rain: { quote: '雨急山溪涨，云迷岭树低', bg: '#d8e2f0', image: 'picture/bg_rain.png', bodyBg: 'linear-gradient(120deg,#1c355d55,#6b8ecb44 45%)' },
