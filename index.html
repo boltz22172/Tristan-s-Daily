@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tristan's Daily</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=20260530-yearly-doc-review" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github.min.css">
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/highlight.min.js"></script>
@@ -48,7 +48,15 @@
 
     <section id="docs" class="view">
       <div class="form-row"><label for="filterType" id="filterLabel"></label><select id="filterType"><option value="all"></option><option value="thought"></option><option value="work"></option></select></div>
+      <p id="docsPeriodLabel" class="muted"></p>
       <div id="timeline"></div>
+      <div class="form-row"><button id="reviewArchiveBtn" data-i18n="reviewPast"></button><button id="backRecentBtn" class="hidden" data-i18n="backRecent"></button></div>
+      <div id="archivePicker" class="card archive-picker hidden">
+        <label for="archiveYear" data-i18n="archiveYear"></label>
+        <input id="archiveYear" type="range" min="2024" step="1" />
+        <output id="archiveYearValue" for="archiveYear"></output>
+        <button id="openArchiveYear" data-i18n="openYear"></button>
+      </div>
     </section>
 
     <section id="featured" class="view"><div id="featuredPanel"></div></section>
@@ -75,6 +83,6 @@
     <label data-i18n="previewOpacity"></label><input id="previewOpacity" type="range" min="0.45" max="0.95" step="0.05" />
   </aside>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=20260530-yearly-doc-review"></script>
 </body>
 </html>
