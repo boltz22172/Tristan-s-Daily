@@ -23,10 +23,13 @@ const md=window.markdownit({html:true,linkify:true,breaks:false,typographer:true
   .use(window.texmath,{engine:window.katex,delimiters:'brackets',katexOptions:{throwOnError:false}})
   .use(window.markdownitContainer,'quote',{render:(tokens,idx)=>tokens[idx].nesting===1?'<blockquote class="md-quote">':'</blockquote>'})
   .use(window.markdownitContainer,'comment',{render:(tokens,idx)=>tokens[idx].nesting===1?'<div class="md-comment">':'</div>'});
+md.enable('table');
 
 // Keep native blockquotes available, but render the quote container with the same look.
 md.renderer.rules.blockquote_open = () => '<blockquote class="md-quote">';
 md.renderer.rules.blockquote_close = () => '</blockquote>';
+md.renderer.rules.table_open = () => '<div class="table-scroll"><table>';
+md.renderer.rules.table_close = () => '</table></div>';
 
 // Custom underline syntax: {{u:text}} -> <u>text</u>, token-safe on inline text tokens only
 md.core.ruler.push('custom_underline', (state) => {
