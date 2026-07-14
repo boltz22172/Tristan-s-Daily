@@ -66,7 +66,7 @@ md.core.ruler.push('custom_underline', (state) => {
   }
 });
 const $=(id)=>document.getElementById(id);
-const dict={zh:{compose:'撰写',docs:'文档',featured:'精选',uploads:'上传文件',save:'保存',settings:'设置',language:'语言',theme:'主题',fontZh:'中文字体',fontEn:'英文字体',previewOpacity:'渲染区透明度',githubToken:'GitHub Token',githubOwner:'GitHub 用户',githubRepo:'GitHub 仓库',githubBranch:'GitHub 分支',syncReload:'从 GitHub 载入',backDocs:'返回文档',setFeatured:'设为精选',thought:'随想',work:'工作日志',all:'全部',filter:'类型筛选',reviewPast:'回顾往年内容',backRecent:'返回最近一年',archiveYear:'选择年份',openYear:'打开该年内容',recentDocs:'最近一年的笔记',archiveDocs:'年的笔记',noDocs:'暂无笔记',titlePH:'标题',mdPH:'开始写作（支持公式与代码）',unsaved:'检测到未保存内容，是否放弃并离开撰写页？',delDoc:'是否删除该文档？',delUpload:'是否删除该上传文件？',saved:'保存成功：',savedRemote:'已保存到 GitHub：',editing:'编辑中：',newStatus:'未保存',savedUpload:'已保存上传文件：',pdfSaved:'PDF 文档已保存',syncReady:'GitHub 直连已开启',syncLocal:'本地模式：未填写 GitHub Token',syncLoadOk:'已从 GitHub 载入',syncFail:'同步失败：'},en:{compose:'Compose',docs:'Documents',featured:'Featured',uploads:'Uploads',save:'Save',settings:'Settings',language:'Language',theme:'Theme',fontZh:'Chinese Font',fontEn:'English Font',previewOpacity:'Preview Opacity',githubToken:'GitHub Token',githubOwner:'GitHub Owner',githubRepo:'GitHub Repo',githubBranch:'GitHub Branch',syncReload:'Load from GitHub',backDocs:'Back to Documents',setFeatured:'Set Featured',thought:'Thought',work:'Work Log',all:'All',filter:'Type Filter',reviewPast:'Review Previous Years',backRecent:'Back to Recent Year',archiveYear:'Select Year',openYear:'Open Year',recentDocs:'Notes from the Last Year',archiveDocs:' Notes',noDocs:'No notes yet',titlePH:'Title',mdPH:'Start writing (math/code supported)',unsaved:'Unsaved changes detected. Discard and leave composer?',delDoc:'Delete this document?',delUpload:'Delete this upload?',saved:'Saved: ',savedRemote:'Saved to GitHub: ',editing:'Editing: ',newStatus:'Not saved',savedUpload:'Saved upload: ',pdfSaved:'PDF saved as document',syncReady:'Direct GitHub sync enabled',syncLocal:'Local mode: GitHub token is not configured',syncLoadOk:'Loaded from GitHub',syncFail:'Sync failed: '}};
+const dict={zh:{compose:'撰写',docs:'文档',featured:'精选',uploads:'上传文件',save:'保存',settings:'设置',language:'语言',theme:'主题',fontZh:'中文字体',fontEn:'英文字体',previewOpacity:'渲染区透明度',githubToken:'GitHub Token',githubOwner:'GitHub 用户',githubRepo:'GitHub 仓库',githubBranch:'GitHub 分支',syncReload:'从 GitHub 载入',uploadLocal:'上传本地全部笔记到 GitHub',backDocs:'返回文档',setFeatured:'设为精选',thought:'随想',work:'工作日志',all:'全部',filter:'类型筛选',reviewPast:'回顾往年内容',backRecent:'返回最近一年',archiveYear:'选择年份',openYear:'打开该年内容',recentDocs:'最近一年的笔记',archiveDocs:'年的笔记',noDocs:'暂无笔记',titlePH:'标题',mdPH:'开始写作（支持公式与代码）',unsaved:'检测到未保存内容，是否放弃并离开撰写页？',delDoc:'是否删除该文档？',delUpload:'是否删除该上传文件？',saved:'保存成功：',savedRemote:'已保存到 GitHub：',editing:'编辑中：',newStatus:'未保存',savedUpload:'已保存上传文件：',pdfSaved:'PDF 文档已保存',syncReady:'GitHub 直连已开启',syncLocal:'本地模式：未填写 GitHub Token',syncLoadOk:'已从 GitHub 载入',syncFail:'同步失败：',uploadLocalNone:'没有找到本地笔记',uploadLocalConfirm:'是否把当前浏览器里的全部本地笔记上传到 GitHub？',uploadLocalProgress:'正在上传本地笔记：',uploadLocalDone:'本地笔记已上传：'},en:{compose:'Compose',docs:'Documents',featured:'Featured',uploads:'Uploads',save:'Save',settings:'Settings',language:'Language',theme:'Theme',fontZh:'Chinese Font',fontEn:'English Font',previewOpacity:'Preview Opacity',githubToken:'GitHub Token',githubOwner:'GitHub Owner',githubRepo:'GitHub Repo',githubBranch:'GitHub Branch',syncReload:'Load from GitHub',uploadLocal:'Upload All Local Notes to GitHub',backDocs:'Back to Documents',setFeatured:'Set Featured',thought:'Thought',work:'Work Log',all:'All',filter:'Type Filter',reviewPast:'Review Previous Years',backRecent:'Back to Recent Year',archiveYear:'Select Year',openYear:'Open Year',recentDocs:'Notes from the Last Year',archiveDocs:' Notes',noDocs:'No notes yet',titlePH:'Title',mdPH:'Start writing (math/code supported)',unsaved:'Unsaved changes detected. Discard and leave composer?',delDoc:'Delete this document?',delUpload:'Delete this upload?',saved:'Saved: ',savedRemote:'Saved to GitHub: ',editing:'Editing: ',newStatus:'Not saved',savedUpload:'Saved upload: ',pdfSaved:'PDF saved as document',syncReady:'Direct GitHub sync enabled',syncLocal:'Local mode: GitHub token is not configured',syncLoadOk:'Loaded from GitHub',syncFail:'Sync failed: ',uploadLocalNone:'No local notes found',uploadLocalConfirm:'Upload all local notes from this browser to GitHub?',uploadLocalProgress:'Uploading local notes: ',uploadLocalDone:'Local notes uploaded: '}};
 
 function t(k){return dict[state.lang][k]||k;}
 function remoteEnabled(){return !!(state.sync.token&&state.sync.owner&&state.sync.repo&&state.sync.branch);}
@@ -100,6 +100,23 @@ async function loadRemoteEntries(showStatus=false){
   renderDocs();renderFeatured();
   if(showStatus)$('status').textContent=t('syncLoadOk');
   return true;
+}
+async function uploadLocalEntriesToGithub(){
+  state.sync.token=$('githubTokenInput').value.trim();
+  state.sync.owner=$('githubOwnerInput').value.trim();
+  state.sync.repo=$('githubRepoInput').value.trim();
+  state.sync.branch=$('githubBranchInput').value.trim()||'main';
+  persist();
+  if(!remoteEnabled()) throw new Error(t('syncLocal'));
+  const localEntries=JSON.parse(localStorage.getItem(STORE)||'[]');
+  if(!localEntries.length){$('syncStatus').textContent=t('uploadLocalNone');return;}
+  if(!confirm(t('uploadLocalConfirm'))) return;
+  for(let i=0;i<localEntries.length;i++){
+    $('syncStatus').textContent=`${t('uploadLocalProgress')}${i+1}/${localEntries.length}`;
+    await saveGithubEntry(localEntries[i]);
+  }
+  await loadRemoteEntries(false);
+  $('syncStatus').textContent=`${t('uploadLocalDone')}${localEntries.length}`;
 }
 function normalizeInlineClosingWhitespace(line){
   const normalizeText=(text)=>text
@@ -360,6 +377,7 @@ $('githubOwnerInput').addEventListener('change',e=>{state.sync.owner=e.target.va
 $('githubRepoInput').addEventListener('change',e=>{state.sync.repo=e.target.value.trim();persist();applyI18n();});
 $('githubBranchInput').addEventListener('change',e=>{state.sync.branch=e.target.value.trim()||'main';persist();applyI18n();});
 $('syncReloadBtn').addEventListener('click',async()=>{try{state.sync.token=$('githubTokenInput').value.trim();state.sync.owner=$('githubOwnerInput').value.trim();state.sync.repo=$('githubRepoInput').value.trim();state.sync.branch=$('githubBranchInput').value.trim()||'main';persist();await loadRemoteEntries(true);$('syncStatus').textContent=t('syncReady');}catch(err){$('syncStatus').textContent=t('syncFail')+err.message;}});
+$('uploadLocalBtn').addEventListener('click',async()=>{try{await uploadLocalEntriesToGithub();}catch(err){$('syncStatus').textContent=t('syncFail')+err.message;}});
 
 init();
 
