@@ -81,8 +81,14 @@
     <label data-i18n="fontZh"></label><select id="fontZhSelect"><option value="xingkai">行楷</option><option value="kaiti">楷体</option><option value="song">宋体</option><option value="hei">黑体</option></select>
     <label data-i18n="fontEn"></label><select id="fontEnSelect"><option value="times">Times New Roman</option><option value="georgia">Georgia</option></select>
     <label data-i18n="previewOpacity"></label><input id="previewOpacity" type="range" min="0.45" max="0.95" step="0.05" />
+    <label data-i18n="githubToken"></label><input id="githubTokenInput" type="password" autocomplete="current-password" placeholder="github_pat_..." />
+    <label data-i18n="githubOwner"></label><input id="githubOwnerInput" />
+    <label data-i18n="githubRepo"></label><input id="githubRepoInput" />
+    <label data-i18n="githubBranch"></label><input id="githubBranchInput" />
+    <button id="syncReloadBtn" data-i18n="syncReload"></button>
+    <p id="syncStatus" class="muted"></p>
   </aside>
 
-  <script src="app.js?v=20260530-markdown-tables"></script>
+  <script src="app.js?v=20260714-github-sync"></script>
 </body>
 </html>
