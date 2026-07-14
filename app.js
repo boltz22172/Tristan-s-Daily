@@ -1,4 +1,4 @@
-const state = { lang: 'zh', entries: [], uploads: [], activeId: null, dirty: false, settings: { theme:'desert', fontZh:'kaiti', fontEn:'times', previewOpacity:0.75 } };
+const state = { lang: 'zh', entries: [], uploads: [], activeId: null, dirty: false, docsArchiveYear: null, settings: { theme:'desert', fontZh:'kaiti', fontEn:'times', previewOpacity:0.75 } };
 const STORE='tristan_entries_v6', USTORE='tristan_uploads_v6', SSTORE='tristan_settings_v1';
 const FONT_STACKS = {
   xingkai: '"STXingkai","KaiTi","Kaiti SC","DFKai-SB",cursive',
@@ -10,23 +10,26 @@ const FONT_STACKS = {
 };
 const THEMES = {
   desert: { quote: '大漠孤烟直，长河落日圆', bg: '#efe2c8', image: 'picture/bg_sand.png', bodyBg: 'linear-gradient(120deg,#f7ebd34d,#0000 45%)' },
-  snow: { quote: '柴门闻犬吠，风雪夜归人', bg: '#eef3f8', image: 'picture/bg_ice.png', bodyBg: 'linear-gradient(120deg,#ffffff66,#d9e6f04d 45%)' },
+  snow: { quote: '风雪压庙门，一夜换乾坤', bg: '#eef3f8', image: 'picture/bg_ice.png', bodyBg: 'linear-gradient(120deg,#ffffff66,#d9e6f04d 45%)' },
   bamboo: { quote: '苍苍竹林寺，杳杳钟声晚', bg: '#e6f2e5', image: 'picture/bg_bamboo.png', bodyBg: 'linear-gradient(120deg,#f3fff34d,#c7e2cb4d 45%)' },
   smoke: { quote: '凭君莫话封侯事，一将功成万骨枯', bg: '#f3d9d4', image: 'picture/bg_cloud.png', bodyBg: 'linear-gradient(120deg,#e14b3e55,#f8d4d055 45%)' },
   rain: { quote: '雨急山溪涨，云迷岭树低', bg: '#d8e2f0', image: 'picture/bg_rain.png', bodyBg: 'linear-gradient(120deg,#1c355d55,#6b8ecb44 45%)' },
   thunder: { quote: '青海长云暗雪山，孤城遥望玉门关', bg: '#ece7f6', image: 'picture/bg_thunder.png', bodyBg: 'linear-gradient(120deg,#d8c7ff66,#f6f3ff55 45%)' },
 };
-const md=window.markdownit({html:true,linkify:true,breaks:true,typographer:true})
+const md=window.markdownit({html:true,linkify:true,breaks:false,typographer:true})
   .use(window.markdownitMark)
   .use(window.markdownitIns)
   .use(window.texmath,{engine:window.katex,delimiters:'dollars',katexOptions:{throwOnError:false}})
   .use(window.texmath,{engine:window.katex,delimiters:'brackets',katexOptions:{throwOnError:false}})
   .use(window.markdownitContainer,'quote',{render:(tokens,idx)=>tokens[idx].nesting===1?'<blockquote class="md-quote">':'</blockquote>'})
   .use(window.markdownitContainer,'comment',{render:(tokens,idx)=>tokens[idx].nesting===1?'<div class="md-comment">':'</div>'});
+md.enable('table');
 
 // Keep native blockquotes available, but render the quote container with the same look.
 md.renderer.rules.blockquote_open = () => '<blockquote class="md-quote">';
 md.renderer.rules.blockquote_close = () => '</blockquote>';
+md.renderer.rules.table_open = () => '<div class="table-scroll"><table>';
+md.renderer.rules.table_close = () => '</table></div>';
 
 // Custom underline syntax: {{u:text}} -> <u>text</u>, token-safe on inline text tokens only
 md.core.ruler.push('custom_underline', (state) => {
@@ -62,10 +65,16 @@ md.core.ruler.push('custom_underline', (state) => {
   }
 });
 const $=(id)=>document.getElementById(id);
-const dict={zh:{compose:'撰写',docs:'文档',featured:'精选',uploads:'上传文件',save:'保存',settings:'设置',language:'语言',theme:'主题',fontZh:'中文字体',fontEn:'英文字体',previewOpacity:'渲染区透明度',backDocs:'返回文档',setFeatured:'设为精选',thought:'随想',work:'工作日志',all:'全部',filter:'类型筛选',titlePH:'标题',mdPH:'开始写作（支持公式与代码）',unsaved:'检测到未保存内容，是否放弃并离开撰写页？',delDoc:'是否删除该文档？',delUpload:'是否删除该上传文件？',saved:'保存成功：',editing:'编辑中：',newStatus:'未保存',savedUpload:'已保存上传文件：',pdfSaved:'PDF 文档已保存'},en:{compose:'Compose',docs:'Documents',featured:'Featured',uploads:'Uploads',save:'Save',settings:'Settings',language:'Language',theme:'Theme',fontZh:'Chinese Font',fontEn:'English Font',previewOpacity:'Preview Opacity',backDocs:'Back to Documents',setFeatured:'Set Featured',thought:'Thought',work:'Work Log',all:'All',filter:'Type Filter',titlePH:'Title',mdPH:'Start writing (math/code supported)',unsaved:'Unsaved changes detected. Discard and leave composer?',delDoc:'Delete this document?',delUpload:'Delete this upload?',saved:'Saved: ',editing:'Editing: ',newStatus:'Not saved',savedUpload:'Saved upload: ',pdfSaved:'PDF saved as document'}};
+const dict={zh:{compose:'撰写',docs:'文档',featured:'精选',uploads:'上传文件',save:'保存',settings:'设置',language:'语言',theme:'主题',fontZh:'中文字体',fontEn:'英文字体',previewOpacity:'渲染区透明度',backDocs:'返回文档',setFeatured:'设为精选',thought:'随想',work:'工作日志',all:'全部',filter:'类型筛选',reviewPast:'回顾往年内容',backRecent:'返回最近一年',archiveYear:'选择年份',openYear:'打开该年内容',recentDocs:'最近一年的笔记',archiveDocs:'年的笔记',noDocs:'暂无笔记',titlePH:'标题',mdPH:'开始写作（支持公式与代码）',unsaved:'检测到未保存内容，是否放弃并离开撰写页？',delDoc:'是否删除该文档？',delUpload:'是否删除该上传文件？',saved:'保存成功：',editing:'编辑中：',newStatus:'未保存',savedUpload:'已保存上传文件：',pdfSaved:'PDF 文档已保存'},en:{compose:'Compose',docs:'Documents',featured:'Featured',uploads:'Uploads',save:'Save',settings:'Settings',language:'Language',theme:'Theme',fontZh:'Chinese Font',fontEn:'English Font',previewOpacity:'Preview Opacity',backDocs:'Back to Documents',setFeatured:'Set Featured',thought:'Thought',work:'Work Log',all:'All',filter:'Type Filter',reviewPast:'Review Previous Years',backRecent:'Back to Recent Year',archiveYear:'Select Year',openYear:'Open Year',recentDocs:'Notes from the Last Year',archiveDocs:' Notes',noDocs:'No notes yet',titlePH:'Title',mdPH:'Start writing (math/code supported)',unsaved:'Unsaved changes detected. Discard and leave composer?',delDoc:'Delete this document?',delUpload:'Delete this upload?',saved:'Saved: ',editing:'Editing: ',newStatus:'Not saved',savedUpload:'Saved upload: ',pdfSaved:'PDF saved as document'}};
 
 function t(k){return dict[state.lang][k]||k;}
 function persist(){localStorage.setItem(STORE,JSON.stringify(state.entries));localStorage.setItem(USTORE,JSON.stringify(state.uploads));localStorage.setItem(SSTORE,JSON.stringify(state.settings));}
+function normalizeInlineClosingWhitespace(line){
+  const normalizeText=(text)=>text
+    .replace(/(\*\*(?=\S)(?:(?!\*\*).)*?\S)([ \t]+)(\*\*)/g,'$1$3$2')
+    .replace(/(\$(?!\$)(?=\S)(?:\\.|[^$\\])*?(?:\\.|\S))([ \t]+)(\$(?!\$))/g,'$1$3$2');
+  return line.split(/(`+[^`]*`+)/g).map((part,idx)=>idx%2===0?normalizeText(part):part).join('');
+}
 function normalizeMarkdownSource(text){
   const lines=String(text||'').replace(/\r\n/g,'\n').split('\n');
   const output=[];
@@ -96,7 +105,8 @@ function normalizeMarkdownSource(text){
     }
   };
 
-  for(const line of lines){
+  for(const rawLine of lines){
+    const line=inFence?rawLine:normalizeInlineClosingWhitespace(rawLine);
     const fenceMatch=fenceStart(line);
     if(fenceMatch){
       closeQuote();
@@ -119,7 +129,7 @@ function normalizeMarkdownSource(text){
     const prefix=quotePrefix(line);
     const content=stripQuotePrefix(line).trim();
     const blankLine=isBlank(line);
-    const quoteLine=prefix!=='' || (inQuote && !blankLine);
+    const quoteLine=prefix!=='';
     const dollarLine=isDollarLine(content);
     const bracketOpen=isBracketOpen(content);
     const bracketClose=isBracketClose(content);
@@ -159,11 +169,7 @@ function normalizeMarkdownSource(text){
     }
 
     if(blankLine){
-      if(inQuote){
-        output.push('');
-        pendingBlank=false;
-        continue;
-      }
+      closeQuote();
       if(pendingBlank){
         output.push('');
         pendingBlank=false;
@@ -255,7 +261,10 @@ function editEntry(e){state.activeId=e.id;$('titleInput').value=e.title;$('dateI
 function buildToc(){const toc=$('readerToc');toc.innerHTML='<h4>目录 / TOC</h4>';const heads=$('readerContent').querySelectorAll('h1,h2,h3');heads.forEach((h,i)=>{if(!h.id)h.id='toc-'+i;const a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;a.className='toc-item '+h.tagName.toLowerCase();a.onclick=(ev)=>{ev.preventDefault();document.getElementById(h.id).scrollIntoView({behavior:'smooth',block:'start'});};toc.appendChild(a);});}
 function browseEntry(e){renderMdInto($('readerContent'),`# ${e.title}\n\n${e.content}`);buildToc();document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='reader'));}
 function deleteEntry(id){if(!confirm(t('delDoc')))return;state.entries=state.entries.filter(e=>e.id!==id);persist();renderDocs();renderFeatured();}
-function renderDocs(){const f=$('filterType').value,target=$('timeline');target.innerHTML='';const g={};state.entries.filter(e=>f==='all'||e.type===f).sort((a,b)=>a.date<b.date?1:-1).forEach(e=>{const m=e.date.slice(0,7);(g[m] ||= []).push(e)});Object.keys(g).sort((a,b)=>a<b?1:-1).forEach(m=>{const c=document.createElement('div');c.className='card';c.innerHTML=`<h3>${m}</h3>`;g[m].forEach(e=>{const r=document.createElement('div');r.className='form-row';r.innerHTML=`<span>${e.date} · ${e.title}</span><button class='browse-btn'>${state.lang==='zh'?'浏览':'Browse'}</button><button class='edit-btn'>${state.lang==='zh'?'编辑':'Edit'}</button><button class='delete-btn'>${state.lang==='zh'?'删除':'Delete'}</button>`;r.querySelector('.browse-btn').onclick=()=>browseEntry(e);r.querySelector('.edit-btn').onclick=()=>editEntry(e);r.querySelector('.delete-btn').onclick=()=>deleteEntry(e.id);c.appendChild(r)});target.appendChild(c)});}
+function renderDocGroups(entries,target){target.innerHTML='';const g={};entries.sort((a,b)=>a.date<b.date?1:-1).forEach(e=>{const m=e.date.slice(0,7);(g[m] ||= []).push(e)});Object.keys(g).sort((a,b)=>a<b?1:-1).forEach(m=>{const c=document.createElement('div');c.className='card';c.innerHTML=`<h3>${m}</h3>`;g[m].forEach(e=>{const r=document.createElement('div');r.className='form-row';r.innerHTML=`<span>${e.date} · ${e.title}</span><button class='browse-btn'>${state.lang==='zh'?'浏览':'Browse'}</button><button class='edit-btn'>${state.lang==='zh'?'编辑':'Edit'}</button><button class='delete-btn'>${state.lang==='zh'?'删除':'Delete'}</button>`;r.querySelector('.browse-btn').onclick=()=>browseEntry(e);r.querySelector('.edit-btn').onclick=()=>editEntry(e);r.querySelector('.delete-btn').onclick=()=>deleteEntry(e.id);c.appendChild(r)});target.appendChild(c)});if(!entries.length)target.innerHTML=`<p class="muted">${t('noDocs')}</p>`;}
+function localDateKey(date){return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;}
+function renderDocs(){const f=$('filterType').value,target=$('timeline'),now=new Date(),cutoff=new Date(now);cutoff.setFullYear(cutoff.getFullYear()-1);const recentCutoff=localDateKey(cutoff),today=localDateKey(now);const entries=state.entries.filter(e=>(f==='all'||e.type===f)&&(state.docsArchiveYear===null?(e.date>=recentCutoff&&e.date<=today):e.date.startsWith(`${state.docsArchiveYear}-`)));$('docsPeriodLabel').textContent=state.docsArchiveYear===null?t('recentDocs'):`${state.docsArchiveYear}${t('archiveDocs')}`;$('backRecentBtn').classList.toggle('hidden',state.docsArchiveYear===null);renderDocGroups(entries,target);}
+function initArchivePicker(){const year=$('archiveYear'),previousYear=new Date().getFullYear()-1,maxYear=Math.max(2024,previousYear);year.max=String(maxYear);year.value=String(maxYear);$('archiveYearValue').textContent=year.value;}
 function renderFeatured(){const t=$('featuredPanel');t.innerHTML='';state.entries.filter(e=>e.featured).forEach(e=>{const c=document.createElement('div');c.className='card';c.innerHTML=`<h3>${e.title}</h3><div class='form-row'><button class='browse-btn'>${state.lang==='zh'?'浏览':'Browse'}</button><button class='edit-btn'>${state.lang==='zh'?'编辑':'Edit'}</button><button class='delete-btn'>${state.lang==='zh'?'删除':'Delete'}</button></div>`;c.querySelector('.browse-btn').onclick=()=>browseEntry(e);c.querySelector('.edit-btn').onclick=()=>editEntry(e);c.querySelector('.delete-btn').onclick=()=>deleteEntry(e.id);t.appendChild(c)});}
 function saveUploadAsEntry(f){const now=new Date(),date=now.toISOString().slice(0,10),type=$('uploadType').value,featured=$('uploadFeatured').checked,title=f.name.replace(/\.md$/i,'').replace(/\.pdf$/i,''),id=`${date}-${type}-${title.toLowerCase().replace(/\s+/g,'-')}`;const content=f.kind==='md'?f.content:`# ${title}\n\n> ${t('pdfSaved')}\n\n<iframe src="${f.content}" style="width:100%;height:70vh;border:1px solid #ccc;border-radius:8px;"></iframe>`;const e={id,title,date,type,featured,content,lastEdited:now.toISOString()};const i=state.entries.findIndex(x=>x.id===id);if(i>=0)state.entries[i]=e;else state.entries.push(e);persist();renderDocs();renderFeatured();}
 function renderUploads(){const list=$('uploadList');list.innerHTML='';state.uploads.forEach((f,idx)=>{const row=document.createElement('div');row.className='form-row card';row.innerHTML=`<span>${f.name} (${f.kind})</span><button class='open-u'>${state.lang==='zh'?'浏览':'Browse'}</button><button class='save-u'>${state.lang==='zh'?'保存到文档':'Save as Doc'}</button><button class='del-u'>${state.lang==='zh'?'删除':'Delete'}</button>`;row.querySelector('.open-u').onclick=()=>openUpload(idx);row.querySelector('.save-u').onclick=()=>{saveUploadAsEntry(f);$('status').textContent=t('savedUpload')+f.name};row.querySelector('.del-u').onclick=()=>{if(confirm(t('delUpload'))){state.uploads.splice(idx,1);persist();renderUploads();$('filePreview').innerHTML='';}};list.appendChild(row);});}
@@ -305,9 +314,10 @@ function syncEditorFromPreview() {
   ta.scrollTop = ratio * Math.max(1, ta.scrollHeight - ta.clientHeight);
 }
 
-function init(){state.entries=JSON.parse(localStorage.getItem(STORE)||'[]');state.uploads=JSON.parse(localStorage.getItem(USTORE)||'[]');state.settings={...state.settings,...JSON.parse(localStorage.getItem(SSTORE)||'{}')};if(state.settings.theme==='light'||state.settings.theme==='dark')state.settings.theme='desert';$('dateInput').valueAsDate=new Date();$('langSelect').value=state.lang;$('themeSelect').value=state.settings.theme;$('fontZhSelect').value=state.settings.fontZh;$('fontEnSelect').value=state.settings.fontEn; $('previewOpacity').value=state.settings.previewOpacity || 0.75;applySettings();applyI18n();renderDocs();renderFeatured();renderUploads();renderMdInto($('preview'),'');loadMetaLine();}
+function init(){state.entries=JSON.parse(localStorage.getItem(STORE)||'[]');state.uploads=JSON.parse(localStorage.getItem(USTORE)||'[]');state.settings={...state.settings,...JSON.parse(localStorage.getItem(SSTORE)||'{}')};if(state.settings.theme==='light'||state.settings.theme==='dark')state.settings.theme='desert';$('dateInput').valueAsDate=new Date();$('langSelect').value=state.lang;$('themeSelect').value=state.settings.theme;$('fontZhSelect').value=state.settings.fontZh;$('fontEnSelect').value=state.settings.fontEn; $('previewOpacity').value=state.settings.previewOpacity || 0.75;initArchivePicker();applySettings();applyI18n();renderDocs();renderFeatured();renderUploads();renderMdInto($('preview'),'');loadMetaLine();}
 
 $('mdInput').addEventListener('input',()=>{renderMdInto($('preview'),$('mdInput').value);state.dirty=true;});$('titleInput').addEventListener('input',()=>state.dirty=true);$('typeInput').addEventListener('change',()=>state.dirty=true);$('featuredInput').addEventListener('change',()=>state.dirty=true);$('filterType').addEventListener('change',renderDocs);$('saveBtn').addEventListener('click',saveEntry);$('uploadInput').addEventListener('change',e=>handleUploads(e.target.files));$('backBtn').addEventListener('click',()=>setView('docs'));document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
+$('reviewArchiveBtn').addEventListener('click',()=>$('archivePicker').classList.toggle('hidden'));$('archiveYear').addEventListener('input',e=>$('archiveYearValue').textContent=e.target.value);$('openArchiveYear').addEventListener('click',()=>{state.docsArchiveYear=Number($('archiveYear').value);$('archivePicker').classList.add('hidden');renderDocs();});$('backRecentBtn').addEventListener('click',()=>{state.docsArchiveYear=null;renderDocs();});
 $('settingsBtn').addEventListener('click',()=>$('settingsPanel').classList.toggle('hidden'));
 $('langSelect').addEventListener('change',e=>{state.lang=e.target.value;applyI18n();renderDocs();renderFeatured();renderUploads();persist();});
 $('themeSelect').addEventListener('change',e=>{state.settings.theme=e.target.value;applySettings();persist();});
