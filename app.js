@@ -1,6 +1,5 @@
-const state = { lang: 'zh', entries: [], uploads: [], activeId: null, dirty: false, docsArchiveYear: null, settings: { theme:'desert', fontZh:'kaiti', fontEn:'times', previewOpacity:0.75 }, sync: { token: '', owner: 'boltz22172', repo: 'Tristan-s-Daily', branch: 'main' } };
-const STORE='tristan_entries_v6', USTORE='tristan_uploads_v6', SSTORE='tristan_settings_v1', SYNCSTORE='tristan_sync_v1';
-const GITHUB_API='https://api.github.com/repos', INDEX_PATH='data/entries.json';
+const state = { lang: 'zh', entries: [], uploads: [], activeId: null, dirty: false, settings: { theme:'desert', fontZh:'kaiti', fontEn:'times', previewOpacity:0.75 } };
+const STORE='tristan_entries_v6', USTORE='tristan_uploads_v6', SSTORE='tristan_settings_v1';
 const FONT_STACKS = {
   xingkai: '"STXingkai","KaiTi","Kaiti SC","DFKai-SB",cursive',
   kaiti: '"STKaiti","KaiTi","Kaiti SC",serif',
@@ -11,26 +10,23 @@ const FONT_STACKS = {
 };
 const THEMES = {
   desert: { quote: '大漠孤烟直，长河落日圆', bg: '#efe2c8', image: 'picture/bg_sand.png', bodyBg: 'linear-gradient(120deg,#f7ebd34d,#0000 45%)' },
-  snow: { quote: '风雪压庙门，一夜换乾坤', bg: '#eef3f8', image: 'picture/bg_ice.png', bodyBg: 'linear-gradient(120deg,#ffffff66,#d9e6f04d 45%)' },
+  snow: { quote: '柴门闻犬吠，风雪夜归人', bg: '#eef3f8', image: 'picture/bg_ice.png', bodyBg: 'linear-gradient(120deg,#ffffff66,#d9e6f04d 45%)' },
   bamboo: { quote: '苍苍竹林寺，杳杳钟声晚', bg: '#e6f2e5', image: 'picture/bg_bamboo.png', bodyBg: 'linear-gradient(120deg,#f3fff34d,#c7e2cb4d 45%)' },
   smoke: { quote: '凭君莫话封侯事，一将功成万骨枯', bg: '#f3d9d4', image: 'picture/bg_cloud.png', bodyBg: 'linear-gradient(120deg,#e14b3e55,#f8d4d055 45%)' },
   rain: { quote: '雨急山溪涨，云迷岭树低', bg: '#d8e2f0', image: 'picture/bg_rain.png', bodyBg: 'linear-gradient(120deg,#1c355d55,#6b8ecb44 45%)' },
   thunder: { quote: '青海长云暗雪山，孤城遥望玉门关', bg: '#ece7f6', image: 'picture/bg_thunder.png', bodyBg: 'linear-gradient(120deg,#d8c7ff66,#f6f3ff55 45%)' },
 };
-const md=window.markdownit({html:true,linkify:true,breaks:false,typographer:true})
+const md=window.markdownit({html:true,linkify:true,breaks:true,typographer:true})
   .use(window.markdownitMark)
   .use(window.markdownitIns)
   .use(window.texmath,{engine:window.katex,delimiters:'dollars',katexOptions:{throwOnError:false}})
   .use(window.texmath,{engine:window.katex,delimiters:'brackets',katexOptions:{throwOnError:false}})
   .use(window.markdownitContainer,'quote',{render:(tokens,idx)=>tokens[idx].nesting===1?'<blockquote class="md-quote">':'</blockquote>'})
   .use(window.markdownitContainer,'comment',{render:(tokens,idx)=>tokens[idx].nesting===1?'<div class="md-comment">':'</div>'});
-md.enable('table');
 
 // Keep native blockquotes available, but render the quote container with the same look.
 md.renderer.rules.blockquote_open = () => '<blockquote class="md-quote">';
 md.renderer.rules.blockquote_close = () => '</blockquote>';
-md.renderer.rules.table_open = () => '<div class="table-scroll"><table>';
-md.renderer.rules.table_close = () => '</table></div>';
 
 // Custom underline syntax: {{u:text}} -> <u>text</u>, token-safe on inline text tokens only
 md.core.ruler.push('custom_underline', (state) => {
@@ -66,64 +62,10 @@ md.core.ruler.push('custom_underline', (state) => {
   }
 });
 const $=(id)=>document.getElementById(id);
-const dict={zh:{compose:'撰写',docs:'文档',featured:'精选',uploads:'上传文件',save:'保存',settings:'设置',language:'语言',theme:'主题',fontZh:'中文字体',fontEn:'英文字体',previewOpacity:'渲染区透明度',githubToken:'GitHub Token',githubOwner:'GitHub 用户',githubRepo:'GitHub 仓库',githubBranch:'GitHub 分支',syncReload:'从 GitHub 载入',uploadLocal:'上传本地全部笔记到 GitHub',backDocs:'返回文档',setFeatured:'设为精选',thought:'随想',work:'工作日志',all:'全部',filter:'类型筛选',reviewPast:'回顾往年内容',backRecent:'返回最近一年',archiveYear:'选择年份',openYear:'打开该年内容',recentDocs:'最近一年的笔记',archiveDocs:'年的笔记',noDocs:'暂无笔记',titlePH:'标题',mdPH:'开始写作（支持公式与代码）',unsaved:'检测到未保存内容，是否放弃并离开撰写页？',delDoc:'是否删除该文档？',delUpload:'是否删除该上传文件？',saved:'保存成功：',savedRemote:'已保存到 GitHub：',editing:'编辑中：',newStatus:'未保存',savedUpload:'已保存上传文件：',pdfSaved:'PDF 文档已保存',syncReady:'GitHub 直连已开启',syncLocal:'本地模式：未填写 GitHub Token',syncLoadOk:'已从 GitHub 载入',syncFail:'同步失败：',uploadLocalNone:'没有找到本地笔记',uploadLocalConfirm:'是否把当前浏览器里的全部本地笔记上传到 GitHub？',uploadLocalProgress:'正在上传本地笔记：',uploadLocalDone:'本地笔记已上传：'},en:{compose:'Compose',docs:'Documents',featured:'Featured',uploads:'Uploads',save:'Save',settings:'Settings',language:'Language',theme:'Theme',fontZh:'Chinese Font',fontEn:'English Font',previewOpacity:'Preview Opacity',githubToken:'GitHub Token',githubOwner:'GitHub Owner',githubRepo:'GitHub Repo',githubBranch:'GitHub Branch',syncReload:'Load from GitHub',uploadLocal:'Upload All Local Notes to GitHub',backDocs:'Back to Documents',setFeatured:'Set Featured',thought:'Thought',work:'Work Log',all:'All',filter:'Type Filter',reviewPast:'Review Previous Years',backRecent:'Back to Recent Year',archiveYear:'Select Year',openYear:'Open Year',recentDocs:'Notes from the Last Year',archiveDocs:' Notes',noDocs:'No notes yet',titlePH:'Title',mdPH:'Start writing (math/code supported)',unsaved:'Unsaved changes detected. Discard and leave composer?',delDoc:'Delete this document?',delUpload:'Delete this upload?',saved:'Saved: ',savedRemote:'Saved to GitHub: ',editing:'Editing: ',newStatus:'Not saved',savedUpload:'Saved upload: ',pdfSaved:'PDF saved as document',syncReady:'Direct GitHub sync enabled',syncLocal:'Local mode: GitHub token is not configured',syncLoadOk:'Loaded from GitHub',syncFail:'Sync failed: ',uploadLocalNone:'No local notes found',uploadLocalConfirm:'Upload all local notes from this browser to GitHub?',uploadLocalProgress:'Uploading local notes: ',uploadLocalDone:'Local notes uploaded: '}};
+const dict={zh:{compose:'撰写',docs:'文档',featured:'精选',uploads:'上传文件',save:'保存',settings:'设置',language:'语言',theme:'主题',fontZh:'中文字体',fontEn:'英文字体',previewOpacity:'渲染区透明度',backDocs:'返回文档',setFeatured:'设为精选',thought:'随想',work:'工作日志',all:'全部',filter:'类型筛选',titlePH:'标题',mdPH:'开始写作（支持公式与代码）',unsaved:'检测到未保存内容，是否放弃并离开撰写页？',delDoc:'是否删除该文档？',delUpload:'是否删除该上传文件？',saved:'保存成功：',editing:'编辑中：',newStatus:'未保存',savedUpload:'已保存上传文件：',pdfSaved:'PDF 文档已保存'},en:{compose:'Compose',docs:'Documents',featured:'Featured',uploads:'Uploads',save:'Save',settings:'Settings',language:'Language',theme:'Theme',fontZh:'Chinese Font',fontEn:'English Font',previewOpacity:'Preview Opacity',backDocs:'Back to Documents',setFeatured:'Set Featured',thought:'Thought',work:'Work Log',all:'All',filter:'Type Filter',titlePH:'Title',mdPH:'Start writing (math/code supported)',unsaved:'Unsaved changes detected. Discard and leave composer?',delDoc:'Delete this document?',delUpload:'Delete this upload?',saved:'Saved: ',editing:'Editing: ',newStatus:'Not saved',savedUpload:'Saved upload: ',pdfSaved:'PDF saved as document'}};
 
 function t(k){return dict[state.lang][k]||k;}
-function remoteEnabled(){return !!(state.sync.token&&state.sync.owner&&state.sync.repo&&state.sync.branch);}
-function persist(){if(!remoteEnabled()){localStorage.setItem(STORE,JSON.stringify(state.entries));localStorage.setItem(USTORE,JSON.stringify(state.uploads));}localStorage.setItem(SSTORE,JSON.stringify(state.settings));localStorage.setItem(SYNCSTORE,JSON.stringify(state.sync));}
-function upsertEntry(e){const i=state.entries.findIndex(x=>x.id===e.id);if(i>=0)state.entries[i]=e;else state.entries.push(e);}
-function githubPath(path){return path.split('/').map(encodeURIComponent).join('/');}
-function slug(value){return String(value||'').toLowerCase().normalize('NFKD').replace(/[^a-z0-9._-]+/g,'-').replace(/^-+|-+$/g,'').slice(0,120);}
-function utf8ToBase64(value){const bytes=new TextEncoder().encode(String(value||''));let binary='';bytes.forEach(byte=>binary+=String.fromCharCode(byte));return btoa(binary);}
-function base64ToUtf8(value){const binary=atob(String(value||'').replace(/\s/g,''));const bytes=Uint8Array.from(binary,ch=>ch.charCodeAt(0));return new TextDecoder().decode(bytes);}
-async function githubRequest(endpoint,options={}){
-  if(!remoteEnabled()) throw new Error(t('syncLocal'));
-  const headers={accept:'application/vnd.github+json',authorization:`Bearer ${state.sync.token}`,'content-type':'application/json',...(options.headers||{})};
-  const body=options.body && typeof options.body!=='string'?JSON.stringify(options.body):options.body;
-  const res=await fetch(`${GITHUB_API}/${state.sync.owner}/${state.sync.repo}/${endpoint}`,{...options,headers,body});
-  let data=null;
-  try{data=await res.json();}catch{}
-  if(!res.ok) throw new Error(data?.message||`${res.status} ${res.statusText}`);
-  return data;
-}
-async function getGithubFile(path){try{return await githubRequest(`contents/${githubPath(path)}?ref=${encodeURIComponent(state.sync.branch)}`);}catch(err){if(String(err.message).includes('Not Found'))return null;throw err;}}
-async function putGithubFile(path,content,message){const current=await getGithubFile(path);return githubRequest(`contents/${githubPath(path)}`,{method:'PUT',body:{message,branch:state.sync.branch,content,...(current?.sha?{sha:current.sha}:{})}});}
-async function deleteGithubFile(path,message){const current=await getGithubFile(path);if(!current?.sha)return;return githubRequest(`contents/${githubPath(path)}`,{method:'DELETE',body:{message,branch:state.sync.branch,sha:current.sha}});}
-function normalizeGithubEntry(entry){const now=new Date().toISOString(),date=/^\d{4}-\d{2}-\d{2}$/.test(entry.date)?entry.date:now.slice(0,10),title=String(entry.title||'Untitled').trim(),type=entry.type==='work'?'work':'thought',id=String(entry.id||`${date}-${type}-${slug(title)||Date.now()}`).trim(),fileName=`${date}-${type}-${slug(title)||Date.now()}.md`,filePath=entry.filePath||`entries/${date.slice(0,4)}/${date.slice(5,7)}/${fileName}`;return{id,title,date,type,featured:!!entry.featured,lastEdited:now,filePath,content:String(entry.content||'')};}
-async function readGithubEntries(){const file=await getGithubFile(INDEX_PATH);if(!file)return[];const entries=JSON.parse(base64ToUtf8(file.content)||'[]');return Promise.all(entries.map(async e=>{if(e.content||!e.filePath)return e;const mdFile=await getGithubFile(e.filePath);return{...e,content:mdFile?base64ToUtf8(mdFile.content):''};}));}
-async function saveGithubEntry(entry){const e=normalizeGithubEntry(entry),entries=await readGithubEntries();await putGithubFile(e.filePath,utf8ToBase64(e.content),`Save ${e.title}`);const next=entries.filter(item=>item.id!==e.id);next.push(e);next.sort((a,b)=>a.date<b.date?1:-1);await putGithubFile(INDEX_PATH,utf8ToBase64(JSON.stringify(next,null,2)+'\n'),'Update entries index');return{entry:e,entries:next};}
-async function deleteGithubEntry(id){const entries=await readGithubEntries(),target=entries.find(e=>e.id===id),next=entries.filter(e=>e.id!==id);if(target?.filePath)await deleteGithubFile(target.filePath,`Delete ${target.title}`);await putGithubFile(INDEX_PATH,utf8ToBase64(JSON.stringify(next,null,2)+'\n'),'Update entries index');return next;}
-async function saveGithubUpload(name,dataUrl,date){const match=String(dataUrl||'').match(/^data:[^;]+;base64,(.+)$/);if(!match)throw new Error('Upload must be a data URL');const path=`uploads/${date.slice(0,4)}/${date.slice(5,7)}/${Date.now()}-${slug(name)||'upload.pdf'}`;await putGithubFile(path,match[1],`Upload ${name}`);return{path,downloadUrl:`https://raw.githubusercontent.com/${state.sync.owner}/${state.sync.repo}/${state.sync.branch}/${path}`};}
-async function loadRemoteEntries(showStatus=false){
-  if(!remoteEnabled()) return false;
-  state.entries=await readGithubEntries();
-  renderDocs();renderFeatured();
-  if(showStatus)$('status').textContent=t('syncLoadOk');
-  return true;
-}
-async function uploadLocalEntriesToGithub(){
-  state.sync.token=$('githubTokenInput').value.trim();
-  state.sync.owner=$('githubOwnerInput').value.trim();
-  state.sync.repo=$('githubRepoInput').value.trim();
-  state.sync.branch=$('githubBranchInput').value.trim()||'main';
-  persist();
-  if(!remoteEnabled()) throw new Error(t('syncLocal'));
-  const localEntries=JSON.parse(localStorage.getItem(STORE)||'[]');
-  if(!localEntries.length){$('syncStatus').textContent=t('uploadLocalNone');return;}
-  if(!confirm(t('uploadLocalConfirm'))) return;
-  for(let i=0;i<localEntries.length;i++){
-    $('syncStatus').textContent=`${t('uploadLocalProgress')}${i+1}/${localEntries.length}`;
-    await saveGithubEntry(localEntries[i]);
-  }
-  await loadRemoteEntries(false);
-  $('syncStatus').textContent=`${t('uploadLocalDone')}${localEntries.length}`;
-}
-function normalizeInlineClosingWhitespace(line){
-  const normalizeText=(text)=>text
-    .replace(/(\*\*(?=\S)(?:(?!\*\*).)*?\S)([ \t]+)(\*\*)/g,'$1$3$2')
-    .replace(/(\$(?!\$)(?=\S)(?:\\.|[^$\\])*?(?:\\.|\S))([ \t]+)(\$(?!\$))/g,'$1$3$2');
-  return line.split(/(`+[^`]*`+)/g).map((part,idx)=>idx%2===0?normalizeText(part):part).join('');
-}
+function persist(){localStorage.setItem(STORE,JSON.stringify(state.entries));localStorage.setItem(USTORE,JSON.stringify(state.uploads));localStorage.setItem(SSTORE,JSON.stringify(state.settings));}
 function normalizeMarkdownSource(text){
   const lines=String(text||'').replace(/\r\n/g,'\n').split('\n');
   const output=[];
@@ -154,8 +96,7 @@ function normalizeMarkdownSource(text){
     }
   };
 
-  for(const rawLine of lines){
-    const line=inFence?rawLine:normalizeInlineClosingWhitespace(rawLine);
+  for(const line of lines){
     const fenceMatch=fenceStart(line);
     if(fenceMatch){
       closeQuote();
@@ -178,7 +119,7 @@ function normalizeMarkdownSource(text){
     const prefix=quotePrefix(line);
     const content=stripQuotePrefix(line).trim();
     const blankLine=isBlank(line);
-    const quoteLine=prefix!=='';
+    const quoteLine=prefix!=='' || (inQuote && !blankLine);
     const dollarLine=isDollarLine(content);
     const bracketOpen=isBracketOpen(content);
     const bracketClose=isBracketClose(content);
@@ -218,7 +159,11 @@ function normalizeMarkdownSource(text){
     }
 
     if(blankLine){
-      closeQuote();
+      if(inQuote){
+        output.push('');
+        pendingBlank=false;
+        continue;
+      }
       if(pendingBlank){
         output.push('');
         pendingBlank=false;
@@ -277,7 +222,7 @@ function applySettings(){const theme=THEMES[state.settings.theme]||THEMES.desert
   const {r,g,b}=hexToRgb(theme.bg);
   document.documentElement.style.setProperty('--editor-surface', `rgba(${r},${g},${b},${state.settings.previewOpacity||0.75})`);
   document.documentElement.style.setProperty('--preview-opacity', String(state.settings.previewOpacity||0.75));}
-function applyI18n(){document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));$('titleInput').placeholder=t('titlePH');$('mdInput').placeholder=t('mdPH');$('filterLabel').textContent=t('filter');$('status').textContent=t('newStatus');$('syncStatus').textContent=remoteEnabled()?t('syncReady'):t('syncLocal');$('typeInput').options[0].text=t('thought');$('typeInput').options[1].text=t('work');$('filterType').options[0].text=t('all');$('filterType').options[1].text=t('thought');$('filterType').options[2].text=t('work');$('uploadType').options[0].text=t('thought');$('uploadType').options[1].text=t('work');const quote=$('themeQuote');if(quote)quote.textContent=(THEMES[state.settings.theme]||THEMES.desert).quote;}
+function applyI18n(){document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));$('titleInput').placeholder=t('titlePH');$('mdInput').placeholder=t('mdPH');$('filterLabel').textContent=t('filter');$('status').textContent=t('newStatus');$('typeInput').options[0].text=t('thought');$('typeInput').options[1].text=t('work');$('filterType').options[0].text=t('all');$('filterType').options[1].text=t('thought');$('filterType').options[2].text=t('work');$('uploadType').options[0].text=t('thought');$('uploadType').options[1].text=t('work');const quote=$('themeQuote');if(quote)quote.textContent=(THEMES[state.settings.theme]||THEMES.desert).quote;}
 
 function weatherText(code){
   if(code===0) return '晴';
@@ -304,19 +249,16 @@ function cityText(place){
 
 function setView(v){if($('compose').classList.contains('active')&&state.dirty&&!confirm(t('unsaved')))return;if(v!=='compose')resetCompose();document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id===v));document.querySelectorAll('.nav-btn').forEach(x=>x.classList.toggle('active',x.dataset.view===v));}
 function resetCompose(){state.activeId=null;$('titleInput').value='';$('dateInput').valueAsDate=new Date();$('typeInput').value='thought';$('featuredInput').checked=false;$('mdInput').value='';renderMdInto($('preview'),'');$('editHint').textContent='';state.dirty=false;}
-function currentEntry(){const title=$('titleInput').value.trim()||'Untitled';const date=$('dateInput').value;const type=$('typeInput').value;const previous=state.entries.find(x=>x.id===state.activeId);const id=state.activeId||`${date}-${type}-${title.toLowerCase().replace(/\s+/g,'-')}`;return{id,title,date,type,featured:$('featuredInput').checked,content:$('mdInput').value,lastEdited:new Date().toISOString(),filePath:previous?.filePath};}
-async function saveEntry(){const e=currentEntry();try{if(remoteEnabled()){const data=await saveGithubEntry(e);state.entries=data.entries;$('status').textContent=t('savedRemote')+data.entry.title;}else{upsertEntry(e);persist();$('status').textContent=t('saved')+e.title;}state.activeId=e.id;state.dirty=false;$('editHint').textContent=t('editing')+e.title;renderDocs();renderFeatured();}catch(err){$('status').textContent=t('syncFail')+err.message;}}
+function currentEntry(){const title=$('titleInput').value.trim()||'Untitled';const date=$('dateInput').value;const type=$('typeInput').value;const id=state.activeId||`${date}-${type}-${title.toLowerCase().replace(/\s+/g,'-')}`;return{id,title,date,type,featured:$('featuredInput').checked,content:$('mdInput').value,lastEdited:new Date().toISOString()};}
+function saveEntry(){const e=currentEntry();const i=state.entries.findIndex(x=>x.id===e.id);if(i>=0)state.entries[i]=e;else state.entries.push(e);state.activeId=e.id;state.dirty=false;persist();$('status').textContent=t('saved')+e.title;$('editHint').textContent=t('editing')+e.title;renderDocs();renderFeatured();}
 function editEntry(e){state.activeId=e.id;$('titleInput').value=e.title;$('dateInput').value=e.date;$('typeInput').value=e.type;$('featuredInput').checked=!!e.featured;$('mdInput').value=e.content;renderMdInto($('preview'),e.content);state.dirty=false;document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='compose'));}
 function buildToc(){const toc=$('readerToc');toc.innerHTML='<h4>目录 / TOC</h4>';const heads=$('readerContent').querySelectorAll('h1,h2,h3');heads.forEach((h,i)=>{if(!h.id)h.id='toc-'+i;const a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;a.className='toc-item '+h.tagName.toLowerCase();a.onclick=(ev)=>{ev.preventDefault();document.getElementById(h.id).scrollIntoView({behavior:'smooth',block:'start'});};toc.appendChild(a);});}
 function browseEntry(e){renderMdInto($('readerContent'),`# ${e.title}\n\n${e.content}`);buildToc();document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='reader'));}
-async function deleteEntry(id){if(!confirm(t('delDoc')))return;try{if(remoteEnabled()){state.entries=await deleteGithubEntry(id);}else{state.entries=state.entries.filter(e=>e.id!==id);persist();}renderDocs();renderFeatured();}catch(err){$('status').textContent=t('syncFail')+err.message;}}
-function renderDocGroups(entries,target){target.innerHTML='';const g={};entries.sort((a,b)=>a.date<b.date?1:-1).forEach(e=>{const m=e.date.slice(0,7);(g[m] ||= []).push(e)});Object.keys(g).sort((a,b)=>a<b?1:-1).forEach(m=>{const c=document.createElement('div');c.className='card';c.innerHTML=`<h3>${m}</h3>`;g[m].forEach(e=>{const r=document.createElement('div');r.className='form-row';r.innerHTML=`<span>${e.date} · ${e.title}</span><button class='browse-btn'>${state.lang==='zh'?'浏览':'Browse'}</button><button class='edit-btn'>${state.lang==='zh'?'编辑':'Edit'}</button><button class='delete-btn'>${state.lang==='zh'?'删除':'Delete'}</button>`;r.querySelector('.browse-btn').onclick=()=>browseEntry(e);r.querySelector('.edit-btn').onclick=()=>editEntry(e);r.querySelector('.delete-btn').onclick=()=>deleteEntry(e.id);c.appendChild(r)});target.appendChild(c)});if(!entries.length)target.innerHTML=`<p class="muted">${t('noDocs')}</p>`;}
-function localDateKey(date){return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;}
-function renderDocs(){const f=$('filterType').value,target=$('timeline'),now=new Date(),cutoff=new Date(now);cutoff.setFullYear(cutoff.getFullYear()-1);const recentCutoff=localDateKey(cutoff),today=localDateKey(now);const entries=state.entries.filter(e=>(f==='all'||e.type===f)&&(state.docsArchiveYear===null?(e.date>=recentCutoff&&e.date<=today):e.date.startsWith(`${state.docsArchiveYear}-`)));$('docsPeriodLabel').textContent=state.docsArchiveYear===null?t('recentDocs'):`${state.docsArchiveYear}${t('archiveDocs')}`;$('backRecentBtn').classList.toggle('hidden',state.docsArchiveYear===null);renderDocGroups(entries,target);}
-function initArchivePicker(){const year=$('archiveYear'),previousYear=new Date().getFullYear()-1,maxYear=Math.max(2024,previousYear);year.max=String(maxYear);year.value=String(maxYear);$('archiveYearValue').textContent=year.value;}
+function deleteEntry(id){if(!confirm(t('delDoc')))return;state.entries=state.entries.filter(e=>e.id!==id);persist();renderDocs();renderFeatured();}
+function renderDocs(){const f=$('filterType').value,target=$('timeline');target.innerHTML='';const g={};state.entries.filter(e=>f==='all'||e.type===f).sort((a,b)=>a.date<b.date?1:-1).forEach(e=>{const m=e.date.slice(0,7);(g[m] ||= []).push(e)});Object.keys(g).sort((a,b)=>a<b?1:-1).forEach(m=>{const c=document.createElement('div');c.className='card';c.innerHTML=`<h3>${m}</h3>`;g[m].forEach(e=>{const r=document.createElement('div');r.className='form-row';r.innerHTML=`<span>${e.date} · ${e.title}</span><button class='browse-btn'>${state.lang==='zh'?'浏览':'Browse'}</button><button class='edit-btn'>${state.lang==='zh'?'编辑':'Edit'}</button><button class='delete-btn'>${state.lang==='zh'?'删除':'Delete'}</button>`;r.querySelector('.browse-btn').onclick=()=>browseEntry(e);r.querySelector('.edit-btn').onclick=()=>editEntry(e);r.querySelector('.delete-btn').onclick=()=>deleteEntry(e.id);c.appendChild(r)});target.appendChild(c)});}
 function renderFeatured(){const t=$('featuredPanel');t.innerHTML='';state.entries.filter(e=>e.featured).forEach(e=>{const c=document.createElement('div');c.className='card';c.innerHTML=`<h3>${e.title}</h3><div class='form-row'><button class='browse-btn'>${state.lang==='zh'?'浏览':'Browse'}</button><button class='edit-btn'>${state.lang==='zh'?'编辑':'Edit'}</button><button class='delete-btn'>${state.lang==='zh'?'删除':'Delete'}</button></div>`;c.querySelector('.browse-btn').onclick=()=>browseEntry(e);c.querySelector('.edit-btn').onclick=()=>editEntry(e);c.querySelector('.delete-btn').onclick=()=>deleteEntry(e.id);t.appendChild(c)});}
-async function saveUploadAsEntry(f){const now=new Date(),date=now.toISOString().slice(0,10),type=$('uploadType').value,featured=$('uploadFeatured').checked,title=f.name.replace(/\.md$/i,'').replace(/\.pdf$/i,''),id=`${date}-${type}-${title.toLowerCase().replace(/\s+/g,'-')}`;let content=f.content;if(f.kind==='pdf'){let src=f.content;if(remoteEnabled()){const uploaded=await saveGithubUpload(f.name,f.content,date);src=uploaded.downloadUrl;}content=`# ${title}\n\n> ${t('pdfSaved')}\n\n<iframe src="${src}" style="width:100%;height:70vh;border:1px solid #ccc;border-radius:8px;"></iframe>`;}const e={id,title,date,type,featured,content,lastEdited:now.toISOString()};if(remoteEnabled()){const data=await saveGithubEntry(e);state.entries=data.entries;}else{upsertEntry(e);persist();}renderDocs();renderFeatured();}
-function renderUploads(){const list=$('uploadList');list.innerHTML='';state.uploads.forEach((f,idx)=>{const row=document.createElement('div');row.className='form-row card';row.innerHTML=`<span>${f.name} (${f.kind})</span><button class='open-u'>${state.lang==='zh'?'浏览':'Browse'}</button><button class='save-u'>${state.lang==='zh'?'保存到文档':'Save as Doc'}</button><button class='del-u'>${state.lang==='zh'?'删除':'Delete'}</button>`;row.querySelector('.open-u').onclick=()=>openUpload(idx);row.querySelector('.save-u').onclick=async()=>{try{await saveUploadAsEntry(f);$('status').textContent=(remoteEnabled()?t('savedRemote'):t('savedUpload'))+f.name;}catch(err){$('status').textContent=t('syncFail')+err.message;}};row.querySelector('.del-u').onclick=()=>{if(confirm(t('delUpload'))){state.uploads.splice(idx,1);persist();renderUploads();$('filePreview').innerHTML='';}};list.appendChild(row);});}
+function saveUploadAsEntry(f){const now=new Date(),date=now.toISOString().slice(0,10),type=$('uploadType').value,featured=$('uploadFeatured').checked,title=f.name.replace(/\.md$/i,'').replace(/\.pdf$/i,''),id=`${date}-${type}-${title.toLowerCase().replace(/\s+/g,'-')}`;const content=f.kind==='md'?f.content:`# ${title}\n\n> ${t('pdfSaved')}\n\n<iframe src="${f.content}" style="width:100%;height:70vh;border:1px solid #ccc;border-radius:8px;"></iframe>`;const e={id,title,date,type,featured,content,lastEdited:now.toISOString()};const i=state.entries.findIndex(x=>x.id===id);if(i>=0)state.entries[i]=e;else state.entries.push(e);persist();renderDocs();renderFeatured();}
+function renderUploads(){const list=$('uploadList');list.innerHTML='';state.uploads.forEach((f,idx)=>{const row=document.createElement('div');row.className='form-row card';row.innerHTML=`<span>${f.name} (${f.kind})</span><button class='open-u'>${state.lang==='zh'?'浏览':'Browse'}</button><button class='save-u'>${state.lang==='zh'?'保存到文档':'Save as Doc'}</button><button class='del-u'>${state.lang==='zh'?'删除':'Delete'}</button>`;row.querySelector('.open-u').onclick=()=>openUpload(idx);row.querySelector('.save-u').onclick=()=>{saveUploadAsEntry(f);$('status').textContent=t('savedUpload')+f.name};row.querySelector('.del-u').onclick=()=>{if(confirm(t('delUpload'))){state.uploads.splice(idx,1);persist();renderUploads();$('filePreview').innerHTML='';}};list.appendChild(row);});}
 function openUpload(idx){const f=state.uploads[idx];if(f.kind==='md'){$('filePreview').innerHTML=`<h3>${f.name}</h3><button id='importMd'>${state.lang==='zh'?'导入到编辑器':'Import to Composer'}</button><div id='mdUploaded'></div>`;renderMdInto($('mdUploaded'),f.content);$('importMd').onclick=()=>{$('titleInput').value=f.name.replace(/\.md$/i,'');$('mdInput').value=f.content;renderMdInto($('preview'),f.content);document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='compose'));state.dirty=true;};}else{$('filePreview').innerHTML=`<h3>${f.name}</h3><iframe src='${f.content}' class='pdf-frame'></iframe>`;}}
 async function handleUploads(files){for(const file of files){if(/\.md$/i.test(file.name))state.uploads.push({name:file.name,kind:'md',content:await file.text(),lastEdited:new Date().toISOString()});else if(/\.pdf$/i.test(file.name)){const data=await new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(file);});state.uploads.push({name:file.name,kind:'pdf',content:data,lastEdited:new Date().toISOString()});}}persist();renderUploads();}
 
@@ -363,21 +305,14 @@ function syncEditorFromPreview() {
   ta.scrollTop = ratio * Math.max(1, ta.scrollHeight - ta.clientHeight);
 }
 
-async function init(){state.sync={...state.sync,...JSON.parse(localStorage.getItem(SYNCSTORE)||'{}')};state.entries=JSON.parse(localStorage.getItem(STORE)||'[]');state.uploads=JSON.parse(localStorage.getItem(USTORE)||'[]');state.settings={...state.settings,...JSON.parse(localStorage.getItem(SSTORE)||'{}')};if(state.settings.theme==='light'||state.settings.theme==='dark')state.settings.theme='desert';$('dateInput').valueAsDate=new Date();$('langSelect').value=state.lang;$('themeSelect').value=state.settings.theme;$('fontZhSelect').value=state.settings.fontZh;$('fontEnSelect').value=state.settings.fontEn;$('githubTokenInput').value=state.sync.token;$('githubOwnerInput').value=state.sync.owner;$('githubRepoInput').value=state.sync.repo;$('githubBranchInput').value=state.sync.branch;$('previewOpacity').value=state.settings.previewOpacity || 0.75;initArchivePicker();applySettings();applyI18n();renderDocs();renderFeatured();renderUploads();renderMdInto($('preview'),'');loadMetaLine();try{await loadRemoteEntries(false);$('syncStatus').textContent=remoteEnabled()?t('syncReady'):t('syncLocal');}catch(err){$('syncStatus').textContent=t('syncFail')+err.message;}}
+function init(){state.entries=JSON.parse(localStorage.getItem(STORE)||'[]');state.uploads=JSON.parse(localStorage.getItem(USTORE)||'[]');state.settings={...state.settings,...JSON.parse(localStorage.getItem(SSTORE)||'{}')};if(state.settings.theme==='light'||state.settings.theme==='dark')state.settings.theme='desert';$('dateInput').valueAsDate=new Date();$('langSelect').value=state.lang;$('themeSelect').value=state.settings.theme;$('fontZhSelect').value=state.settings.fontZh;$('fontEnSelect').value=state.settings.fontEn; $('previewOpacity').value=state.settings.previewOpacity || 0.75;applySettings();applyI18n();renderDocs();renderFeatured();renderUploads();renderMdInto($('preview'),'');loadMetaLine();}
 
 $('mdInput').addEventListener('input',()=>{renderMdInto($('preview'),$('mdInput').value);state.dirty=true;});$('titleInput').addEventListener('input',()=>state.dirty=true);$('typeInput').addEventListener('change',()=>state.dirty=true);$('featuredInput').addEventListener('change',()=>state.dirty=true);$('filterType').addEventListener('change',renderDocs);$('saveBtn').addEventListener('click',saveEntry);$('uploadInput').addEventListener('change',e=>handleUploads(e.target.files));$('backBtn').addEventListener('click',()=>setView('docs'));document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
-$('reviewArchiveBtn').addEventListener('click',()=>$('archivePicker').classList.toggle('hidden'));$('archiveYear').addEventListener('input',e=>$('archiveYearValue').textContent=e.target.value);$('openArchiveYear').addEventListener('click',()=>{state.docsArchiveYear=Number($('archiveYear').value);$('archivePicker').classList.add('hidden');renderDocs();});$('backRecentBtn').addEventListener('click',()=>{state.docsArchiveYear=null;renderDocs();});
 $('settingsBtn').addEventListener('click',()=>$('settingsPanel').classList.toggle('hidden'));
 $('langSelect').addEventListener('change',e=>{state.lang=e.target.value;applyI18n();renderDocs();renderFeatured();renderUploads();persist();});
 $('themeSelect').addEventListener('change',e=>{state.settings.theme=e.target.value;applySettings();persist();});
 $('fontZhSelect').addEventListener('change',e=>{state.settings.fontZh=e.target.value;applySettings();persist();});
 $('fontEnSelect').addEventListener('change',e=>{state.settings.fontEn=e.target.value;applySettings();persist();});
-$('githubTokenInput').addEventListener('change',e=>{state.sync.token=e.target.value.trim();persist();applyI18n();});
-$('githubOwnerInput').addEventListener('change',e=>{state.sync.owner=e.target.value.trim();persist();applyI18n();});
-$('githubRepoInput').addEventListener('change',e=>{state.sync.repo=e.target.value.trim();persist();applyI18n();});
-$('githubBranchInput').addEventListener('change',e=>{state.sync.branch=e.target.value.trim()||'main';persist();applyI18n();});
-$('syncReloadBtn').addEventListener('click',async()=>{try{state.sync.token=$('githubTokenInput').value.trim();state.sync.owner=$('githubOwnerInput').value.trim();state.sync.repo=$('githubRepoInput').value.trim();state.sync.branch=$('githubBranchInput').value.trim()||'main';persist();await loadRemoteEntries(true);$('syncStatus').textContent=t('syncReady');}catch(err){$('syncStatus').textContent=t('syncFail')+err.message;}});
-$('uploadLocalBtn').addEventListener('click',async()=>{try{await uploadLocalEntriesToGithub();}catch(err){$('syncStatus').textContent=t('syncFail')+err.message;}});
 
 init();
 
